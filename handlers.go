@@ -29,23 +29,17 @@ func echo(w http.ResponseWriter, r *http.Request) {
 		sw := string(message)
 		switch sw {
 		case "LU":
-			log.Println("left up")
 			Left(false)
 		case "LD":
-			log.Println("left down")
 			Left(true)
 		case "RU":
 			Right(false)
-			log.Println("right up")
 		case "RD":
 			Right(true)
-			log.Println("right down")
 		case "L":
 			Launch()
-			log.Println("launch")
 		case "S":
 			Start()
-			log.Println("start")
 		}
 
 		log.Printf("recv: %s", message)
