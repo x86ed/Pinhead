@@ -64,15 +64,12 @@ func Blink() {
 			v1 ^= 1
 			l1.SetValue(v1)
 			fmt.Printf("Set pin %d %s\n", offset1, values[v1])
-		case <-time.After(2 * time.Second):
 			v2 ^= 1
 			l2.SetValue(v2)
 			fmt.Printf("Set pin %d %s\n", offset2, values[v2])
-		case <-time.After(3 * time.Second):
 			v3 ^= 1
 			l3.SetValue(v3)
 			fmt.Printf("Set pin %d %s\n", offset3, values[v3])
-		case <-time.After(4 * time.Second):
 			v4 ^= 1
 			l4.SetValue(v4)
 			fmt.Printf("Set pin %d %s\n", offset4, values[v4])
