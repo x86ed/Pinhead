@@ -33,10 +33,10 @@ func Right(d bool) {
 	if err != nil {
 		panic(err)
 	}
-	// defer func() {
-	// 	l1.Reconfigure(gpiod.AsInput)
-	// 	l1.Close()
-	// }()
+	defer func() {
+		l1.Reconfigure(gpiod.AsInput)
+		l1.Close()
+	}()
 	out := 1
 	if d {
 		out = 0
