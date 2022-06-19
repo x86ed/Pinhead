@@ -10,7 +10,7 @@ import (
 func Left(d bool) {
 	offset1 := rpi.J8p31
 	v1 := 0
-	l1, err := gpiod.RequestLine("gpiochip0", offset1, gpiod.AsOutput(v1, 0))
+	l1, err := gpiod.RequestLine("gpiochip0", offset1, gpiod.AsOutput(v1))
 	if err != nil {
 		panic(err)
 	}
@@ -27,9 +27,9 @@ func Left(d bool) {
 }
 
 func Right(d bool) {
-	offset1 := rpi.J8p35
+	offset1 := rpi.J8p37
 	v1 := 0
-	l1, err := gpiod.RequestLine("gpiochip0", offset1, gpiod.AsOutput(v1, 0))
+	l1, err := gpiod.RequestLine("gpiochip0", offset1, gpiod.WithPullUp, gpiod.AsOutput(v1))
 	if err != nil {
 		panic(err)
 	}
@@ -46,7 +46,7 @@ func Right(d bool) {
 }
 
 func Start() {
-	offset1 := rpi.J8p37
+	offset1 := rpi.J8p35
 	v1 := 0
 	l1, err := gpiod.RequestLine("gpiochip0", offset1, gpiod.AsOutput(v1))
 	if err != nil {
