@@ -601,14 +601,14 @@ body {
   color: #fff;
   font-weight: 500;
   left: 0;
-  padding: 5px 20px 5px 20px;
+  padding: .5em 2em;
   position: absolute;
   top: 33px;
   transition-property: top, background;
   transition-duration: 500ms;
   transition-timing-function: ease;
   font-family: "Poppins", sans-serif;
-  font-size: 0.5em;
+  font-size: 0.75em;
 }
 
 .control-group input[type=text]:focus + label {
@@ -790,4 +790,8 @@ Use box-shadow for inner-div's sharp-bottom-highight and border-gradient on top
   to {
     background-position: 0 100px, 50px 150px;
   }
+}
+
+.hidden{
+  opacity: 0;
 }

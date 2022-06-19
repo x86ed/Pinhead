@@ -15,7 +15,7 @@ func main() {
 	// go Blink()
 	InitialMigration()
 	CreateRouter()
-	InitializeStatic()
 	InitializeRoute()
+	InitializeStatic()
 	ServerStart()
 }

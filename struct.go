@@ -4,6 +4,7 @@ import (
 	"time"
 
 	uuid "github.com/satori/go.uuid"
+	"gorm.io/gorm"
 )
 
 type Base struct {
@@ -13,16 +14,16 @@ type Base struct {
 	DeletedAt *time.Time `sql:"index"`
 }
 
-// // BeforeCreate will set a UUID rather than numeric ID.
-// func (base *Base) BeforeCreate(db *gorm.DB) error {
-// 	uuid := uuid.NewV4()
-// 	return db.Set("ID", uuid)
-// }
+// BeforeCreate will set a UUID rather than numeric ID.
+func (base *Base) BeforeCreate(db *gorm.DB) error {
+	base.ID = uuid.NewV4()
+
+	return nil
+}
 
 type User struct {
 	Base
 	Name     string `gorm:"unique" json:"name"`
-	Email    string `json:"email"`
 	Password string `json:"password"`
 	Role     string `json:"role"`
 	Initials string `json:"initials"`
@@ -30,8 +31,10 @@ type User struct {
 
 type Score struct {
 	Base
-	User  uuid.UUID `json:"user"`
-	Score int64     `json:"score"`
+	User     uuid.UUID `json:"user"`
+	Score    int64     `json:"score"`
+	Complete bool      `json:"complete"`
+	Active   bool      `json:"active"`
 }
 
 type Game struct {
@@ -48,7 +51,7 @@ type Authentication struct {
 
 type Token struct {
 	Role        string `json:"role"`
-	Email       string `json:"email"`
+	Name        string `json:"name"`
 	TokenString string `json:"token"`
 }
 

@@ -34,6 +34,8 @@ func InitialMigration() {
 	connection := GetDatabase()
 	defer CloseDatabase(connection)
 	connection.AutoMigrate(User{})
+	// connection.AutoMigrate(Score{})
+	// connection.AutoMigrate(Game{})
 }
 
 //closes database connection

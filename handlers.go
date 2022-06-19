@@ -2,9 +2,60 @@ package main
 
 import (
 	"encoding/json"
+	"flag"
 	"log"
 	"net/http"
+
+	"github.com/gorilla/websocket"
 )
+
+var addr = flag.String("addr", "localhost:8080", "http service address")
+
+var upgrader = websocket.Upgrader{} // use default options
+
+func echo(w http.ResponseWriter, r *http.Request) {
+	c, err := upgrader.Upgrade(w, r, nil)
+	if err != nil {
+		log.Print("upgrade:", err)
+		return
+	}
+	defer c.Close()
+	for {
+		mt, message, err := c.ReadMessage()
+		if err != nil {
+			log.Println("read:", err)
+			break
+		}
+		sw := string(message)
+		switch sw {
+		case "LU":
+			log.Println("left up")
+			Left(false)
+		case "LD":
+			log.Println("left down")
+			Left(true)
+		case "RU":
+			Right(false)
+			log.Println("right up")
+		case "RD":
+			Right(true)
+			log.Println("right down")
+		case "L":
+			Launch()
+			log.Println("launch")
+		case "S":
+			Start()
+			log.Println("start")
+		}
+
+		log.Printf("recv: %s", message)
+		err = c.WriteMessage(mt, message)
+		if err != nil {
+			log.Println("write:", err)
+			break
+		}
+	}
+}
 
 func SignUp(w http.ResponseWriter, r *http.Request) {
 	connection := GetDatabase()
@@ -21,10 +72,10 @@ func SignUp(w http.ResponseWriter, r *http.Request) {
 	}
 
 	var dbuser User
-	connection.Where("email = ?", user.Email).First(&dbuser)
+	connection.Where("name = ?", user.Name).First(&dbuser)
 
 	//check email is alredy registered or not
-	if dbuser.Email != "" {
+	if dbuser.Name != "" {
 		var err Error
 		err = SetError(err, "Email already in use")
 		w.Header().Set("Content-Type", "application/json")
@@ -61,7 +112,7 @@ func SignIn(w http.ResponseWriter, r *http.Request) {
 	var authUser User
 	connection.Where("name = 	?", authDetails.Name).First(&authUser)
 
-	if authUser.Email == "" {
+	if authUser.Name == "" {
 		var err Error
 		err = SetError(err, "Username or Password is incorrect")
 		w.Header().Set("Content-Type", "application/json")
@@ -79,7 +130,7 @@ func SignIn(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	validToken, err := GenerateJWT(authUser.Email, authUser.Role)
+	validToken, err := GenerateJWT(authUser.Name, authUser.Role)
 	if err != nil {
 		var err Error
 		err = SetError(err, "Failed to generate token")
@@ -89,7 +140,7 @@ func SignIn(w http.ResponseWriter, r *http.Request) {
 	}
 
 	var token Token
-	token.Email = authUser.Email
+	token.Name = authUser.Name
 	token.Role = authUser.Role
 	token.TokenString = validToken
 	w.Header().Set("Content-Type", "application/json")
