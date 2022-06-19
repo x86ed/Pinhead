@@ -30,10 +30,10 @@ func echo(w http.ResponseWriter, r *http.Request) {
 		switch sw {
 		case "LU":
 			Left(false)
-		case "LD":
-			Left(true)
 		case "RU":
 			Right(false)
+		case "LD":
+			Left(true)
 		case "RD":
 			Right(true)
 		case "L":

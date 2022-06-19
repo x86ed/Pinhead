@@ -114,7 +114,7 @@ const sendLD = () =>{
     return false;
 };
 
-const sendRU =  () =>{
+const sendRU = () =>{
     if (!ws) {
         return false;
     }
@@ -123,7 +123,7 @@ const sendRU =  () =>{
     return false;
 };
 
-const sendRD =()=>{
+const sendRD = ()=>{
     if (!ws) {
         return false;
     }
@@ -156,10 +156,10 @@ document.querySelector("body").onload = function(evt) {
     document.getElementById("launchbutton").onclick = sendL;
     
     document.getElementById("leftbutton").onmousedown = sendLU;
+
+    document.getElementById("rightbutton").onmousedown = sendRU;
     
     document.getElementById("leftbutton").onmouseup = sendLD;
-    
-    document.getElementById("rightbutton").onmousedown =sendRU;
     
     document.getElementById("rightbutton").onmouseup = sendRD;
     return false;
