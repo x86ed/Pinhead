@@ -23,6 +23,7 @@ func Left(d bool) {
 		out = 0
 	}
 	l1.SetValue(out)
+	time.Sleep(time.Millisecond * 17)
 }
 
 func Right(d bool) {
@@ -41,6 +42,7 @@ func Right(d bool) {
 		out = 0
 	}
 	l1.SetValue(out)
+	time.Sleep(time.Millisecond * 17)
 }
 
 func Start() {
