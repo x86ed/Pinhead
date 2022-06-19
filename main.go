@@ -12,7 +12,7 @@ var (
 )
 
 func main() {
-	go Blink()
+	// go Blink()
 	InitialMigration()
 	CreateRouter()
 	InitializeStatic()
