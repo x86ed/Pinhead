@@ -95,15 +95,16 @@
             fill="freeze"
             />
           </svg>
-  <div class="container checkcontainer" >
+  <form id="signup-box" action="" method="post" class="container checkcontainer" >
     <div class="control-group">
-      <input id="input" type="text" name="input" placeholder="Enter your name" />
-      <label for="input">name</label>
+        <input id="name" type="text" name="name" placeholder="Enter your name" required />
+        <label for="name">name</label>
     </div>
-      <div class="control-group small">
-      <input id="initals" type="text" name="initals" placeholder="ACE" />
-      <label for="input">three letter initials</label>
+    <div class="control-group small">
+        <label for="initials">three letter initials</label>
+        <input id="initials" type="text" name="initials" placeholder="ACE" required />
     </div>
+    <button id="signup-button" type="button">Signup</button>
       <!-- power switch -->
     <!-- <div class="switch">  
       <div class=round>
@@ -116,11 +117,11 @@
         </div>
       </div>
     </div> -->
-  </div>
+</form>
 
 <div class="queue checkcontainer">
 <h3>Queue</h3>
-<ol>
+<ol id="queue-list">
 <li class="expired">Ace - ACE</li>
 <li class="expired">Adam - ABS</li>
 <li class="user">Pinocchio - CAP</li>

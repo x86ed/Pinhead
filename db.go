@@ -50,6 +50,7 @@ func CloseDatabase(connection *gorm.DB) error {
 	if err != nil {
 		return err
 	}
+	fmt.Println("Closing database connection.")
 	sqldb.Close()
 	return nil
 }

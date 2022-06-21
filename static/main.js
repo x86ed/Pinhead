@@ -1,4 +1,6 @@
 const signup = (name,initials) =>{
+    console.log('this is name in signup: ', name);
+    console.log('this is initials in signup: ', initials);
     const myHeaders = new Headers();
     myHeaders.append("Content-Type", "application/json");
 
@@ -8,18 +10,37 @@ const signup = (name,initials) =>{
     "role": "user",
     "initials": initials
     });
-
+    
     const requestOptions = {
     method: 'POST',
     headers: myHeaders,
     body: raw,
     redirect: 'follow'
     };
-
+    
     fetch("/signup", requestOptions)
     .then(response => response.text())
-    .then(result => console.log(result))
+    .then(result => {
+      console.log(result);
+      updateList(result);
+    })
     .catch(error => console.log('error', error));
+}
+
+const updateList = (result) => {
+    
+    let queueList = document.getElementById('queue-list');
+    
+    let arr = [];
+    for (const element of JSON.parse(result)) {
+        let listItem = document.createElement('li');
+        listItem.textContent = `${element.Name} - ${element.Initials}`;
+        arr.push(listItem);
+    }
+    
+    arr[0].classList.add("user");
+    
+    queueList.replaceChildren(...arr);
 }
 
 const signin = (name,initials)=>{
@@ -165,19 +186,32 @@ document.querySelector("body").onload = function(evt) {
     return false;
 };
 
-document.getElementById("send").onclick = function() {
-    if (!ws) {
-        return false;
-    }
-    print("SEND: " + input.value);
-    ws.send(input.value);
-    return false;
-};
+// document.getElementById("send").onclick = function() {
+//     if (!ws) {
+//         return false;
+//     }
+//     print("SEND: " + input.value);
+//     ws.send(input.value);
+//     return false;
+// };
 
-document.getElementById("close").onclick = function() {
-    if (!ws) {
-        return false;
-    }
-    ws.close();
-    return false;
-};
+// document.getElementById("close").onclick = function() {
+//     if (!ws) {
+//         return false;
+//     }
+//     ws.close();
+//     return false;
+// };
+document.getElementById("signup-button").addEventListener("click", handleSignUp);
+
+function handleSignUp(event) {
+    event.preventDefault();
+    
+    let name = document.getElementById("name").value;
+    let initials = document.getElementById("initials").value;
+    
+    document.getElementById("name").value = '';
+    document.getElementById("initials").value = '';
+    
+    signup(name, initials);
+}

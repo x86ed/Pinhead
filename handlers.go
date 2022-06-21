@@ -82,10 +82,32 @@ func SignUp(w http.ResponseWriter, r *http.Request) {
 		log.Fatalln("Error in password hashing.")
 	}
 
-	//insert user details in database
+	// insert user details in database
 	connection.Create(&user)
 	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(user)
+	// json.NewEncoder(w).Encode(user)
+
+	// get list of users to return as queued players
+	var users []User
+	connection.Find(&users)
+
+	type Players struct {
+		Name     string
+		Initials string
+	}
+
+	var players []Players
+
+	for _, element := range users {
+		players = append(players, Players{Name: element.Name, Initials: element.Initials})
+	}
+
+	json.NewEncoder(w).Encode(players)
+}
+
+func HandleQueue() {
+	connection := GetDatabase()
+	defer CloseDatabase(connection)
 }
 
 func SignIn(w http.ResponseWriter, r *http.Request) {
