@@ -106,7 +106,7 @@ func SignUp(w http.ResponseWriter, r *http.Request) {
 }
 
 func HandleQueue() {
-	connection := GetDatabase()
+	connection, _ := GetDatabase()
 	defer CloseDatabase(connection)
 }
 
@@ -161,14 +161,6 @@ func SignIn(w http.ResponseWriter, r *http.Request) {
 	token.TokenString = validToken
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(token)
-}
-
-func AdminIndex(w http.ResponseWriter, r *http.Request) {
-	if r.Header.Get("Role") != "admin" {
-		w.Write([]byte("Not authorized."))
-		return
-	}
-	w.Write([]byte("Welcome, Admin."))
 }
 
 func UserIndex(w http.ResponseWriter, r *http.Request) {
