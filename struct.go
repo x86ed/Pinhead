@@ -27,6 +27,7 @@ type User struct {
 	Password string `json:"password"`
 	Role     string `json:"role"`
 	Initials string `json:"initials"`
+	WsToken  string `json:"wsToken"`
 }
 
 type Score struct {

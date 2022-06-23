@@ -44,9 +44,9 @@ func IsAuthorized(handler http.HandlerFunc) http.HandlerFunc {
 
 			} else if claims["role"] == "user" {
 				r.Header.Set("Role", "user")
+				r.Header.Set("Name", fmt.Sprintf("%v", claims["name"]))
 				handler.ServeHTTP(w, r)
 				return
-
 			}
 		}
 		var reserr Error

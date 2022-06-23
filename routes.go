@@ -25,7 +25,8 @@ func InitializeRoute() {
 	router.HandleFunc("/signin", SignIn).Methods("POST")
 	router.HandleFunc("/admin", IsAuthorized(AdminIndex)).Methods("GET")
 	router.HandleFunc("/user", IsAuthorized(UserIndex)).Methods("GET")
-	router.HandleFunc("/buttonpress", echo).Methods("GET")
+	router.HandleFunc("/wsurl", IsAuthorized(GenerateUserWsUrl)).Methods("POST")
+	router.HandleFunc("/buttonpress/{wsToken}", echo).Methods("GET")
 	router.Methods("OPTIONS").HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Access-Control-Allow-Origin", "")
 		w.Header().Set("Access-Control-Allow-Methods", "POST, GET, OPTIONS, PUT, DELETE")
