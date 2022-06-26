@@ -2,47 +2,54 @@ package main
 
 import (
 	"fmt"
-	"log"
 
 	"gorm.io/driver/sqlite"
 	"gorm.io/gorm"
 )
 
 //returns database connection
-func GetDatabase() *gorm.DB {
+func GetDatabase() (*gorm.DB, error) {
 
 	connection, err := gorm.Open(sqlite.Open("pinhead.db"), &gorm.Config{})
 	if err != nil {
-		log.Fatalln("Failed to connect to the database")
+		return nil, err
 	}
 
 	sqldb, err := connection.DB()
 	if err != nil {
-		log.Fatalln("Failed to connect to the database")
+		return nil, err
 	}
 
 	err = sqldb.Ping()
 	if err != nil {
-		log.Fatal("Database connected")
+		return nil, err
 	}
 	fmt.Println("Database connection successful.")
-	return connection
+	return connection, nil
 }
 
 //create user table in userdb
-func InitialMigration() {
-	connection := GetDatabase()
+func InitialMigration() error {
+	connection, err := GetDatabase()
+	if err != nil {
+		return err
+	}
 	defer CloseDatabase(connection)
-	connection.AutoMigrate(User{})
+	err = connection.AutoMigrate(User{})
+	if err != nil {
+		return err
+	}
 	// connection.AutoMigrate(Score{})
 	// connection.AutoMigrate(Game{})
+	return nil
 }
 
 //closes database connection
-func CloseDatabase(connection *gorm.DB) {
+func CloseDatabase(connection *gorm.DB) error {
 	sqldb, err := connection.DB()
 	if err != nil {
-		log.Fatalln("Failed to connect to the database")
+		return err
 	}
 	sqldb.Close()
+	return nil
 }

@@ -1,21 +1,25 @@
 package main
 
 import (
+	"log"
+
 	"github.com/gorilla/mux"
 )
 
 //--------GLOBAL VARIABLES---------------
 
 var (
-	router    *mux.Router
-	secretkey string = "secretkeyjwt"
+	router       *mux.Router
+	secretkey, _ = GoDotEnvVariable("JWTKEY")
 )
 
 func main() {
-	// go Blink()
-	InitialMigration()
+	err := InitialMigration()
 	CreateRouter()
 	InitializeRoute()
 	InitializeStatic()
 	ServerStart()
+	if err != nil {
+		log.Fatal("Couldn't initalize service")
+	}
 }
