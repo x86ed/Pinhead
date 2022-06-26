@@ -1,3 +1,4 @@
+//go:generate ./scripts/make-env.sh
 package main
 
 import (
