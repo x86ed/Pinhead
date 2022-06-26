@@ -16,10 +16,13 @@ var (
 
 func main() {
 	err := InitialMigration()
+	if err != nil {
+		log.Fatal("Couldn't initalize service")
+	}
 	CreateRouter()
 	InitializeRoute()
 	InitializeStatic()
-	ServerStart()
+	err = ServerStart()
 	if err != nil {
 		log.Fatal("Couldn't initalize service")
 	}

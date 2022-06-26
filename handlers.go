@@ -26,21 +26,21 @@ func echo(w http.ResponseWriter, r *http.Request) {
 			log.Println("read:", err)
 			break
 		}
-		//sw := string(message)
-		// switch sw {
-		// case "LU":
-		// 	Left(false)
-		// case "RU":
-		// 	Right(false)
-		// case "LD":
-		// 	Left(true)
-		// case "RD":
-		// 	Right(true)
-		// case "L":
-		// 	Launch()
-		// case "S":
-		// 	Start()
-		// }
+		sw := string(message)
+		switch sw {
+		case "LU":
+			Left(false)
+		case "RU":
+			Right(false)
+		case "LD":
+			Left(true)
+		case "RD":
+			Right(true)
+		case "L":
+			Launch()
+		case "S":
+			Start()
+		}
 
 		log.Printf("recv: %s", message)
 		err = c.WriteMessage(mt, message)
