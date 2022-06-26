@@ -5,6 +5,9 @@
 *.so
 *.dylib
 
+# OS files
+.DS_store
+
 # Test binary, built with `go test -c`
 *.test
 
@@ -12,4 +15,13 @@
 *.out
 
 # Dependency directories (remove the comment below to include it)
-# vendor/
+vendor/
+
+# SQLite db
+pinhead.db
+
+# Compiled executeable
+pinhead
+
+# env vars
+.env
