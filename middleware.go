@@ -44,6 +44,7 @@ func IsAuthorized(handler http.HandlerFunc) http.HandlerFunc {
 
 			} else if claims["role"] == "user" {
 				r.Header.Set("Role", "user")
+				//adding the name from the claim so it's easier to access internally
 				r.Header.Set("Name", fmt.Sprintf("%v", claims["name"]))
 				handler.ServeHTTP(w, r)
 				return

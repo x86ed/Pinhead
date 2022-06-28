@@ -17,10 +17,9 @@ var addr = flag.String("addr", "localhost:8080", "http service address")
 var upgrader = websocket.Upgrader{} // use default options
 
 func echo(w http.ResponseWriter, r *http.Request) {
-
+	//get token from the route path
 	vars := mux.Vars(r)
 	token := vars["wsToken"]
-    fmt.Print("wsToken: ", token)
 
 	c, err := upgrader.Upgrade(w, r, nil)
 	if err != nil {
@@ -31,17 +30,15 @@ func echo(w http.ResponseWriter, r *http.Request) {
 
 	connection := GetDatabase()
 	defer CloseDatabase(connection)
-
+	//get user by token
 	var dbuser User
 	connection.Where("wsToken = ?", token).First(&dbuser)
-
-	//WSToken DOESNT EXIST IN db
+	//wsToken doesn't exist in db
 	if dbuser.Name == "" {
 		log.Print("wsToken does not exist in the database. No user was returned.")
 		return
 	}
-	
-	// single use token so clear it out
+	//single use token so clear it out
 	dbuser.WsToken = ""
 	connection.Save(&dbuser)
 
@@ -182,23 +179,15 @@ func UserIndex(w http.ResponseWriter, r *http.Request) {
 	w.Write([]byte("Welcome, User."))
 }
 
-/*
-	what we had done on another project was authenticate the user by regular means, 
-	then they make an ajax call to a WS auth endpoint (passing in the auth header 
-	as normal). That would generate a user-specific token that gets stored in a DB 
-	and a WS URL with that token is returned. When the client makes the WS connection 
-	with the URL, we can then validate that the token in the URL is in the DB
-*/
 func GenerateUserWsUrl(w http.ResponseWriter, r *http.Request){
 	connection := GetDatabase()
 	defer CloseDatabase(connection)
 
 	userName := r.Header.Get("Name")
-	
 	var dbuser User
 	connection.Where("name = ?", userName).First(&dbuser)
 
-	//USERNAME DOESNT EXIST IN db
+	//username doesn't exist in db
 	if dbuser.Name == "" {
 		var err Error
 		err = SetError(err, "Username not found in database")
@@ -207,19 +196,13 @@ func GenerateUserWsUrl(w http.ResponseWriter, r *http.Request){
 		return
 	}
 
-	var wsToken string 
-	wsToken = uuid.New().String()
-	fmt.Println("wsToken:", wsToken)
+	wsToken := uuid.New().String()
 	dbuser.WsToken = wsToken
 	connection.Save(&dbuser)
 
-	
-
-	fmt.Println("junk:", r.Host)
-
 	//wsUrl += "wss:" hardcoded to http at the moment
+	//create and return the websocket url with a user token in the route
 	wsUrl := fmt.Sprintf("ws://%v/buttonpress/%v", r.Host, wsToken)
-	fmt.Println("wsUrl:", wsUrl)
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(wsUrl)
 }

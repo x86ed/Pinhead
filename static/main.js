@@ -81,20 +81,6 @@ const getSocketURI = () => {
     .catch((error) => console.log("error", error));
 };
 
-const getSocketURIold = () => {
-  let loc = window.location,
-    new_uri;
-  print("loc: ", loc);
-  if (loc.protocol === "https:") {
-    new_uri = "wss:";
-  } else {
-    new_uri = "ws:";
-  }
-  new_uri += "//" + loc.host;
-  new_uri += loc.pathname + "buttonpress";
-  return new_uri;
-};
-
 var output = document.getElementById("output");
 var input = document.getElementById("input");
 let ws;
@@ -161,9 +147,7 @@ document.querySelector("body").onload = function (evt) {
   if (ws) {
     return false;
   }
-  wss = getSocketURI();
-  print("wss: ", wss);
-  ws = new WebSocket(wss);
+  ws = new WebSocket(getSocketURI());
 
   ws.onopen = function (evt) {
     print("OPEN");
