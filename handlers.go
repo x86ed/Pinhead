@@ -74,7 +74,7 @@ func echo(w http.ResponseWriter, r *http.Request) {
 }
 
 func SignUp(w http.ResponseWriter, r *http.Request) {
-	connection := GetDatabase()
+	connection, _ := GetDatabase()
 	defer CloseDatabase(connection)
 
 	var user User
@@ -99,7 +99,7 @@ func SignUp(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	user.Password, err = GeneratehashPassword(user.Password)
+	user.Password, err = GenerateHashPassword(user.Password)
 	if err != nil {
 		log.Fatalln("Error in password hashing.")
 	}
@@ -111,7 +111,7 @@ func SignUp(w http.ResponseWriter, r *http.Request) {
 }
 
 func SignIn(w http.ResponseWriter, r *http.Request) {
-	connection := GetDatabase()
+	connection, _ := GetDatabase()
 	defer CloseDatabase(connection)
 
 	var authDetails Authentication

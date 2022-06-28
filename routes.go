@@ -2,24 +2,23 @@ package main
 
 import (
 	"fmt"
-	"log"
 	"net/http"
 
 	"github.com/gorilla/handlers"
 	"github.com/gorilla/mux"
 )
 
-//create a mux router
+// create a mux router
 func CreateRouter() {
 	router = mux.NewRouter()
 }
 
-//static files
+// static files
 func InitializeStatic() {
 	router.PathPrefix("/").Handler(http.FileServer(http.Dir("./static/")))
 }
 
-//initialize all routes
+// initialize all routes
 func InitializeRoute() {
 	router.HandleFunc("/signup", SignUp).Methods("POST")
 	router.HandleFunc("/signin", SignIn).Methods("POST")
@@ -34,11 +33,12 @@ func InitializeRoute() {
 	})
 }
 
-//start the server
-func ServerStart() {
+// start the server
+func ServerStart() error {
 	fmt.Println("Server started at http://localhost:8080")
 	err := http.ListenAndServe(":8080", handlers.CORS(handlers.AllowedHeaders([]string{"X-Requested-With", "Access-Control-Allow-Origin", "Content-Type", "Authorization"}), handlers.AllowedMethods([]string{"GET", "POST", "PUT", "DELETE", "HEAD", "OPTIONS"}), handlers.AllowedOrigins([]string{"*"}))(router))
 	if err != nil {
-		log.Fatal(err)
+		return err
 	}
+	return nil
 }

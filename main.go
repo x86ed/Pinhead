@@ -1,21 +1,29 @@
+//go:generate ./scripts/make-env.sh
 package main
 
 import (
+	"log"
+
 	"github.com/gorilla/mux"
 )
 
 //--------GLOBAL VARIABLES---------------
 
 var (
-	router    *mux.Router
-	secretkey string = "secretkeyjwt"
+	router       *mux.Router
+	secretkey, _ = GoDotEnvVariable("JWTKEY")
 )
 
 func main() {
-	// go Blink()
-	InitialMigration()
+	err := InitialMigration()
+	if err != nil {
+		log.Fatal("Couldn't initalize service")
+	}
 	CreateRouter()
 	InitializeRoute()
 	InitializeStatic()
-	ServerStart()
+	err = ServerStart()
+	if err != nil {
+		log.Fatal("Couldn't initalize service")
+	}
 }
