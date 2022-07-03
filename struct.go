@@ -24,14 +24,9 @@ func (base *Base) BeforeCreate(db *gorm.DB) error {
 type User struct {
 	Base
 	Name     string `gorm:"unique" json:"name"`
-	Password string `json:"password"`
+	Password string `json:"password,omitempty"`
 	Role     string `json:"role"`
-	Initials string `json:"initials"`
-}
-
-type DeleteUser struct {
-	Base
-	Name     string `gorm:"unique" json:"name"`
+	Initials string `json:"initials,omitempty"`
 }
 
 type Score struct {

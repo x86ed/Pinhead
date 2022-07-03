@@ -23,11 +23,11 @@ func InitializeStatic() {
 func InitializeRoute() {
 	router.HandleFunc("/signup", SignUp).Methods("POST")
 	router.HandleFunc("/signin", SignIn).Methods("POST")
-	router.HandleFunc("/admin", IsAuthorized(AdminIndex, true)).Methods("GET")
 	router.HandleFunc("/user", IsAuthorized(UserIndex, false)).Methods("GET")
 	router.HandleFunc("/buttonpress", echo).Methods("GET")
+	router.HandleFunc("/users", IsAuthorized(ListUsers, true)).Methods("GET")
 	router.HandleFunc("/admin", IsAuthorized(CreateAdminAccount, true)).Methods("POST")
-	router.HandleFunc("/admin", IsAuthorized(DeleteAccount, true)).Methods("DELETE")
+	router.HandleFunc("/admin/{userId}", IsAuthorized(DeleteAccount, true)).Methods("DELETE")
 	router.HandleFunc("/logout", IsAuthorized(Logout, false)).Methods("POST")	
 	router.Methods("OPTIONS").HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Access-Control-Allow-Origin", "")
