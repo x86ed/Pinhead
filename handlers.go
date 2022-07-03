@@ -77,6 +77,14 @@ func SignUp(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	if user.Role == "admin" {
+		var err Error
+		err = SetError(err, "Cannot create'admin' accounts")
+		w.Header().Set("Content-Type", "application/json")
+		json.NewEncoder(w).Encode(err)
+		return		
+	}
+
 	user.Password, err = GenerateHashPassword(user.Password)
 	if err != nil {
 		log.Fatalln("Error in password hashing.")
@@ -155,4 +163,48 @@ func UserIndex(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	w.Write([]byte("Welcome, User."))
+}
+
+func CreateAdminAccount(w http.ResponseWriter, r *http.Request) {
+	CreateAdmin(w, r)
+}
+
+func DeleteAccount(w http.ResponseWriter, r *http.Request) {
+
+	connection, _ := GetDatabase()
+	defer CloseDatabase(connection)
+
+	var user DeleteUser
+	err := json.NewDecoder(r.Body).Decode(&user)
+	if err != nil {
+		var err Error
+		err = SetError(err, "Error in reading payload.")
+		w.Header().Set("Content-Type", "application/json")
+		json.NewEncoder(w).Encode(err)
+		return
+	}
+
+	//can't delete self
+	if r.Header.Get("Name") == user.Name {
+		var err Error
+		err = SetError(err, "User can't delete themselves")
+		w.Header().Set("Content-Type", "application/json")
+		json.NewEncoder(w).Encode(err)
+		return
+	}
+
+	dbErr := connection.Where("name = ?", user.Name).Delete(User{})
+
+	if dbErr.Error != nil {
+		var err Error
+		err = SetError(err, "Username does't exist")
+		w.Header().Set("Content-Type", "application/json")
+		json.NewEncoder(w).Encode(err)
+		return
+	}
+}
+
+func Logout(w http.ResponseWriter, r *http.Request) {
+	//JWT tokens typically just expire
+	//are we going to implement something like cookies instead that we can revoke?
 }

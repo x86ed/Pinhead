@@ -11,6 +11,7 @@ import (
 
 var (
 	router       *mux.Router
+	localRouter  *mux.Router
 	secretkey, _ = GoDotEnvVariable("JWTKEY")
 )
 

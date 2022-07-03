@@ -10,7 +10,7 @@ import (
 )
 
 //check whether user is authorized or not
-func IsAuthorized(handler http.HandlerFunc) http.HandlerFunc {
+func IsAuthorized(handler http.HandlerFunc, requireAdmin bool) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 
 		if r.Header["Authorization"] == nil {
@@ -37,20 +37,26 @@ func IsAuthorized(handler http.HandlerFunc) http.HandlerFunc {
 		}
 
 		if claims, ok := token.Claims.(jwt.MapClaims); ok && token.Valid {
-			if claims["role"] == "admin" {
-				r.Header.Set("Role", "admin")
-				handler.ServeHTTP(w, r)
+			if requireAdmin && claims["role"] != "admin" {
+				var err Error
+				err = SetError(err, "Admin access is required.")
+				json.NewEncoder(w).Encode(err)
 				return
-
-			} else if claims["role"] == "user" {
-				r.Header.Set("Role", "user")
-				handler.ServeHTTP(w, r)
-				return
-
+			} else {
+				r.Header.Set("Name", fmt.Sprintf("%v", claims["name"]))
+				if claims["role"] == "admin" {
+					r.Header.Set("Role", "admin")
+					handler.ServeHTTP(w, r)
+					return
+				} else if claims["role"] == "user" {
+					r.Header.Set("Role", "user")
+					handler.ServeHTTP(w, r)
+					return
+				}
 			}
 		}
 		var reserr Error
-		reserr = SetError(reserr, "Not Authorized.")
+		SetError(reserr, "Not Authorized.")
 		json.NewEncoder(w).Encode(err)
 	}
 }

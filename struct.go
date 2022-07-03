@@ -29,6 +29,11 @@ type User struct {
 	Initials string `json:"initials"`
 }
 
+type DeleteUser struct {
+	Base
+	Name     string `gorm:"unique" json:"name"`
+}
+
 type Score struct {
 	Base
 	User     uuid.UUID `json:"user"`
