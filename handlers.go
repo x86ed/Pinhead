@@ -191,14 +191,14 @@ func ListUsers (w http.ResponseWriter, r *http.Request) {
 }
 
 func (u User) MarshalJSON() ([]byte, error) {
-    // prevent recursion
+	// prevent recursion
 	type user User
-    x := user(u)
+	x := user(u)
 	// remove users password so it is not returned to the caller
-    x.Password = ""
+	x.Password = ""
 	// returning the initials basically is the same as returning the password
 	x.Initials = ""
-    return json.Marshal(x)
+	return json.Marshal(x)
 }
 
 func CreateAdminAccount(w http.ResponseWriter, r *http.Request) {
