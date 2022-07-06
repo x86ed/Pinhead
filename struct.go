@@ -17,13 +17,14 @@ type Base struct {
 // BeforeCreate will set a UUID rather than numeric ID.
 func (base *Base) BeforeCreate(db *gorm.DB) error {
 	base.ID = uuid.NewV4()
-
+	base.CreatedAt = time.Now()
+	base.UpdatedAt = time.Now()
 	return nil
 }
 
 type User struct {
 	Base
-	Name     string `gorm:"unique" json:"name"`
+	Name     string `json:"name" gorm:"unique"`
 	Password string `json:"password"`
 	Role     string `json:"role"`
 	Initials string `json:"initials"`
@@ -39,9 +40,9 @@ type Score struct {
 
 type Game struct {
 	Base
-	Scores  []Score
-	Active  bool `json:"active"`
-	Players []User
+	Scores []Score `json:"scores" gorm:"many2many:GameScore"`
+	Active bool    `json:"active"`
+	Users  []User  `json:"users" gorm:"many2many:GameUser"`
 }
 
 type Authentication struct {
@@ -56,6 +57,6 @@ type Token struct {
 }
 
 type Error struct {
-	IsError bool   `json:"isError"`
+	IsError bool   `json:"is_error"`
 	Message string `json:"message"`
 }
