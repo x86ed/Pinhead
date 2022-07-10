@@ -1,0 +1,21 @@
+body, html {
+    width: 100vw;
+    height: 100vh;
+  }
+
+  .notAuthorizedBody {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .giphy {
+    width: 250px;
+    border: none; 
+  }
+
+  .backBtn {
+    margin: 20px;
+    align-self: center;
+    border-radius: 5px;
+    border-color: white;
+  }

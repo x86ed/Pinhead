@@ -8,7 +8,8 @@
   <link rel="stylesheet" href="style.css">
   <link rel="stylesheet" href="fonts/style.css">
   <link rel="preconnect" href="https://fonts.googleapis.com"> 
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin> 
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
   <link href="https://fonts.googleapis.com/css2?family=Catamaran:wght@900&display=swap" rel="stylesheet">
 </head>
 
@@ -96,6 +97,11 @@
             />
           </svg>
   <div class="container checkcontainer" >
+    <div class="adminNav">
+        <button id="adminPage" class="adminBtn" >
+          <i class="fa fa-gamepad"></i>
+        </button>
+    </div>
     <div class="control-group">
       <input id="input" type="text" name="input" placeholder="Enter your name" />
       <label for="input">name</label>
@@ -104,7 +110,7 @@
       <input id="initals" type="text" name="initals" placeholder="ACE" />
       <label for="input">three letter initials</label>
     </div>
-      <!-- power switch -->
+    <!-- power switch -->
     <!-- <div class="switch">  
       <div class=round>
         <input type=checkbox id=onoff name=onoff/>
@@ -152,6 +158,28 @@
 </div>
 </div>
 </slider>
+</div>
+
+<!-- The Modal -->
+<div id="myModal" class="adminSigninModal">
+
+  <!-- Modal content -->
+  <div class="modal-content">
+      <div class="modal-line start">
+        <p>Admin sign in:</p>
+        <p id="modalError1" class="modalErrora">Username and Password are required</p>
+        <p id="modalError2" class="modalErrora">Username or Password does not exist</p>
+      </div>
+      <div id="disone" class="modal-line center">
+        <input id="adminUsername" type="text" name="adminUsername" placeholder="Enter your name" />
+        <input id="adminPassword" type="password" name="password" placeholder="*****" />
+      </div>
+      <div class="modal-line end">
+        <button id="aModalCancel">Cancel</button>
+        <button id="aModalSubmit">Goto Admin Page</button>
+      </div>
+  </div>
+
 </div>
 
 <script src="main.js"></script>

@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Admin Page</title>
+    <script type="module" src="https://1.www.s81c.com/common/carbon/web-components/tag/latest/accordion.min.js"></script>
+    <script type="module" src="https://1.www.s81c.com/common/carbon/web-components/tag/latest/data-table.min.js"></script>
+    <script type="module" src="https://1.www.s81c.com/common/carbon/web-components/tag/latest/pagination.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+    <script type="module" src="userTable.js"></script>
+    <link href="../style.css" rel="stylesheet">
+    <link href="adminStyle.css" rel="stylesheet">
+    <script type="text/javascript">
+      function authenticatePage(){
+        // user must be authenticated and admin to be here
+        let token = sessionStorage.getItem('jwtToken');
+        let role = sessionStorage.getItem('userRole');
+        console.log("token: ", token);
+/*
+        if (value =='undefined' || value == null || value == undefined)
+        {
+          window.location.href="/login";
+        }
+          getUsers();
+          */
+      }
+  </script>
+  </head>
+  <body class="adminPageBody" onload="authenticatePage()">
+    <div class="notAuthorizedBody">
+      <iframe class="giphy" src="https://giphy.com/embed/wSSooF0fJM97W"></iframe>
+      <button class="backBtn" onclick="window.location.href='../index.html';">
+        <i class="fa fa-angle-double-left"></i>
+        Return to Safety
+        <i class="fa fa-angle-double-right"></i> 
+      </button>
+    </div>
+    <!---
+    <div class="queue checkcontainer">
+      <div id="sortable-pagination"></div>
+      <check id="checkerboard"></check>
+    </div>
+    -->
+    <!-- The Modal -->
+<div id="deleteModal" class="adminSigninModal">
+
+  <!-- Modal content -->
+  <div class="modal-content">
+      <div class="modal-content start">
+        <p id="deleteUserText"></p>
+      </div>
+      <div class="modal-content end">
+        <button onclick="cancelDelete()"><i class="fa fa-times"></i></button>
+        <button id="confirmDeleteUserBtn" onclick="deleteUser(this.value)"><i class="fa fa-bomb"></i></button>
+      </div>
+  </div>
+
+</div>
+<script src="admin.js"></script>
+  </body>
+</html>

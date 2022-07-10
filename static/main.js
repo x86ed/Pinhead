@@ -1,4 +1,6 @@
-const signup = (name,initials) =>{
+let authUser;
+
+const signup = (name, initials) => {
     const myHeaders = new Headers();
     myHeaders.append("Content-Type", "application/json");
 
@@ -22,13 +24,15 @@ const signup = (name,initials) =>{
     .catch(error => console.log('error', error));
 }
 
-const signin = (name,initials)=>{
+const signin = async (name,password)=>{
     const myHeaders = new Headers();
     myHeaders.append("Content-Type", "application/json");
 
+    console.log("signing in user: ", name);
+
     const raw = JSON.stringify({
     "name": name,
-    "password": name+initials
+    "password": password //normal case password = name + initials
     });
 
     const requestOptions = {
@@ -39,9 +43,19 @@ const signin = (name,initials)=>{
     };
 
     fetch("http://localhost:8080/signin", requestOptions)
-    .then(response => response.text())
-    .then(result => console.log(result))
-    .catch(error => console.log('error', error));
+        .then(response => response.text())
+        .then(result => {
+            console.log(result);
+            authUser = JSON.parse(result);
+            console.log("authUser: ", authUser);
+            sessionStorage.setItem("userName", authUser.name);
+            sessionStorage.setItem("userRole", authUser.role);
+            sessionStorage.setItem("jwtToken", authUser.TokenString);
+        })
+        .catch(error => {
+            console.log('error', error);
+            authUser = null;
+        });
 }
 
 var myHeaders = new Headers();
@@ -132,6 +146,41 @@ const sendRD = ()=>{
     return false;
 };
 
+var adminModal = document.getElementById("myModal");
+
+const openAdminSignin = () => {
+    adminModal.style.display = "block";
+}
+
+const closeAdminSignin = () => {
+    adminModal.style.display = "none";
+    document.getElementById("modalError1").style.visibility = "hidden";
+    document.getElementById("modalError1").style.visibility = "hidden";
+}
+
+const submitAdminCred = async () => {
+    var username = document.getElementById("adminUsername").value;
+    var password = document.getElementById("adminPassword").value;
+
+    if (!!username && !!password) {
+        document.getElementById("modalError1").style.visibility = "hidden";
+        console.log("good")
+        await signin(username, password);
+        if (authUser && authUser.role === "admin") {
+            console.log("yay adim");
+            document.getElementById("modalError2").style.visibility = "hidden";
+            window.location.href = 'AdminPage/admin.html';
+        }
+        else {
+            console.log("NOOOO");
+            document.getElementById("modalError2").style.visibility = "visible";
+        }
+    }
+    else {
+        document.getElementById("modalError1").style.visibility = "visible";
+    }
+}
+
 document.querySelector("body").onload = function(evt) {
     if (ws) {
         return false;
@@ -162,6 +211,25 @@ document.querySelector("body").onload = function(evt) {
     document.getElementById("leftbutton").onmouseup = sendLD;
     
     document.getElementById("rightbutton").onmouseup = sendRD;
+
+    //document.getElementById("adminBtn").onclick = signin;
+
+    
+    document.getElementById("adminPage").onclick = openAdminSignin;
+
+    document.getElementById("aModalCancel").onclick = closeAdminSignin;
+
+    document.getElementById("aModalSubmit").onclick = async () => { await submitAdminCred() };
+
+    var modal = document.getElementById("myModal");
+    // When the user clicks anywhere outside of the modal, close it
+    window.onclick = function(event) {
+    if (event.target == modal) {
+        closeAdminSignin();
+    }
+  }
+
+
     return false;
 };
 
@@ -180,4 +248,14 @@ document.getElementById("close").onclick = function() {
     }
     ws.close();
     return false;
+};
+
+function parseJwt (token) {
+    var base64Url = token.split('.')[1];
+    var base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+    var jsonPayload = decodeURIComponent(window.atob(base64).split('').map(function(c) {
+        return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
+    }).join(''));
+
+    return JSON.parse(jsonPayload);
 };
