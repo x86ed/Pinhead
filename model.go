@@ -27,7 +27,7 @@ type User struct {
 	Name     string `json:"name" gorm:"unique"`
 	Password string `json:"password"`
 	Role     string `json:"role"`
-	Initials string `json:"initials"`
+	Initials string `json:"initials" gorm:"type:varchar(3)"`
 }
 
 type Score struct {

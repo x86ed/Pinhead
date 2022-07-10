@@ -15,3 +15,8 @@ type Error struct {
 	IsError bool   `json:"is_error"`
 	Message string `json:"message"`
 }
+
+type Player struct {
+	Name     string
+	Initials string
+}

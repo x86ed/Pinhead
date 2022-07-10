@@ -91,15 +91,10 @@ func SignUp(w http.ResponseWriter, r *http.Request) {
 	var users []User
 	connection.Find(&users)
 
-	type Players struct {
-		Name     string
-		Initials string
-	}
-
-	var players []Players
+	var players []Player
 
 	for _, element := range users {
-		players = append(players, Players{Name: element.Name, Initials: element.Initials})
+		players = append(players, Player{Name: element.Name, Initials: element.Initials})
 	}
 
 	json.NewEncoder(w).Encode(players)
