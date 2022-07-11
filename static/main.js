@@ -1,91 +1,45 @@
-let authUser;
+import * as api from "/api.js"
 
-const signup = (name, initials) => {
-    const myHeaders = new Headers();
-    myHeaders.append("Content-Type", "application/json");
-
-    const raw = JSON.stringify({
-    "name": name,
-    "password": name+initials,
-    "role": "user",
-    "initials": initials
-    });
-
-    const requestOptions = {
-    method: 'POST',
-    headers: myHeaders,
-    body: raw,
-    redirect: 'follow'
-    };
-
-    fetch("/signup", requestOptions)
-    .then(response => response.text())
-    .then(result => console.log(result))
-    .catch(error => console.log('error', error));
+/* 
+* Admin Modal Controls 
+*/
+const openAdminSignin = () => {
+    document.getElementById("adminModal").style.display = "block";
 }
 
-const signin = async (name,password)=>{
-    const myHeaders = new Headers();
-    myHeaders.append("Content-Type", "application/json");
-
-    console.log("signing in user: ", name);
-
-    const raw = JSON.stringify({
-    "name": name,
-    "password": password //normal case password = name + initials
-    });
-
-    const requestOptions = {
-    method: 'POST',
-    headers: myHeaders,
-    body: raw,
-    redirect: 'follow'
-    };
-
-    fetch("http://localhost:8080/signin", requestOptions)
-        .then(response => response.text())
-        .then(result => {
-            console.log(result);
-            authUser = JSON.parse(result);
-            console.log("authUser: ", authUser);
-            sessionStorage.setItem("userName", authUser.name);
-            sessionStorage.setItem("userRole", authUser.role);
-            sessionStorage.setItem("jwtToken", authUser.TokenString);
-        })
-        .catch(error => {
-            console.log('error', error);
-            authUser = null;
-        });
+const closeAdminSignin = () => {
+    document.getElementById("adminModal").style.display = "none";
+    document.getElementById("modalError1").style.visibility = "hidden";
+    document.getElementById("modalError1").style.visibility = "hidden";
 }
 
-var myHeaders = new Headers();
-myHeaders.append("Authorization", "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhdXRob3JpemVkIjp0cnVlLCJleHAiOjE2NTU2Njg5MjAsIm5hbWUiOiJkZXJwIiwicm9sZSI6InVzZXIifQ.w09Rwoa7X0Fu5aMXrvQ5KMwA5VeSpMhSJ1j24snTdJU");
+async function submitAdminCred() {
+    var username = document.getElementById("adminUsername").value;
+    var password = document.getElementById("adminPassword").value;
 
-var requestOptions = {
-  method: 'GET',
-  headers: myHeaders,
-  redirect: 'follow'
-};
-
-fetch("http://localhost:8080/user", requestOptions)
-  .then(response => response.text())
-  .then(result => console.log(result))
-  .catch(error => console.log('error', error));
-
-const getSocketURI = () => {
-    let loc = window.location, new_uri;
-    if (loc.protocol === "https:") {
-        new_uri = "wss:";
-    } else {
-        new_uri = "ws:";
+    if (!!username && !!password) {
+        document.getElementById("modalError1").style.visibility = "hidden";
+        var authUser = await api.adminSignin(username, password);
+        if (authUser && authUser.role === "admin") {
+            document.getElementById("modalError2").style.visibility = "hidden";
+            window.location.href = 'AdminPage/admin.html';
+        }
+        else {
+            document.getElementById("modalError2").style.visibility = "visible";
+        }
     }
-    new_uri += "//" + loc.host;
-    new_uri += loc.pathname + "buttonpress";
-    return new_uri;
+    else {
+        document.getElementById("modalError1").style.visibility = "visible";
+    }
 }
 
+//unused???
 var output = document.getElementById("output");
 var input = document.getElementById("input");
+
+/*
+* Websockets
+*/
 let ws;
 
 var print = function(message) {
@@ -146,46 +100,11 @@ const sendRD = ()=>{
     return false;
 };
 
-var adminModal = document.getElementById("myModal");
-
-const openAdminSignin = () => {
-    adminModal.style.display = "block";
-}
-
-const closeAdminSignin = () => {
-    adminModal.style.display = "none";
-    document.getElementById("modalError1").style.visibility = "hidden";
-    document.getElementById("modalError1").style.visibility = "hidden";
-}
-
-const submitAdminCred = async () => {
-    var username = document.getElementById("adminUsername").value;
-    var password = document.getElementById("adminPassword").value;
-
-    if (!!username && !!password) {
-        document.getElementById("modalError1").style.visibility = "hidden";
-        console.log("good")
-        await signin(username, password);
-        if (authUser && authUser.role === "admin") {
-            console.log("yay adim");
-            document.getElementById("modalError2").style.visibility = "hidden";
-            window.location.href = 'AdminPage/admin.html';
-        }
-        else {
-            console.log("NOOOO");
-            document.getElementById("modalError2").style.visibility = "visible";
-        }
-    }
-    else {
-        document.getElementById("modalError1").style.visibility = "visible";
-    }
-}
-
 document.querySelector("body").onload = function(evt) {
     if (ws) {
         return false;
     }
-    ws = new WebSocket(getSocketURI());
+    ws = new WebSocket(api.getSocketURI());
     ws.onopen = function(evt) {
         print("OPEN");
     }
@@ -212,27 +131,24 @@ document.querySelector("body").onload = function(evt) {
     
     document.getElementById("rightbutton").onmouseup = sendRD;
 
-    //document.getElementById("adminBtn").onclick = signin;
-
-    
-    document.getElementById("adminPage").onclick = openAdminSignin;
+    document.getElementById("openAdminSignin").onclick = openAdminSignin;
 
     document.getElementById("aModalCancel").onclick = closeAdminSignin;
 
     document.getElementById("aModalSubmit").onclick = async () => { await submitAdminCred() };
 
-    var modal = document.getElementById("myModal");
+    var modal = document.getElementById("adminModal");
     // When the user clicks anywhere outside of the modal, close it
     window.onclick = function(event) {
     if (event.target == modal) {
         closeAdminSignin();
     }
   }
-
-
     return false;
 };
 
+/*
+these look unused
 document.getElementById("send").onclick = function() {
     if (!ws) {
         return false;
@@ -249,13 +165,4 @@ document.getElementById("close").onclick = function() {
     ws.close();
     return false;
 };
-
-function parseJwt (token) {
-    var base64Url = token.split('.')[1];
-    var base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
-    var jsonPayload = decodeURIComponent(window.atob(base64).split('').map(function(c) {
-        return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
-    }).join(''));
-
-    return JSON.parse(jsonPayload);
-};
+*/

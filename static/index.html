@@ -97,8 +97,8 @@
             />
           </svg>
   <div class="container checkcontainer" >
-    <div class="adminNav">
-        <button id="adminPage" class="adminBtn" >
+    <div class="adminCtrl">
+        <button id="openAdminSignin" class="adminBtn">
           <i class="fa fa-gamepad"></i>
         </button>
     </div>
@@ -160,17 +160,14 @@
 </slider>
 </div>
 
-<!-- The Modal -->
-<div id="myModal" class="adminSigninModal">
-
-  <!-- Modal content -->
+<div id="adminModal" class="adminSigninModal">
   <div class="modal-content">
       <div class="modal-line start">
         <p>Admin sign in:</p>
-        <p id="modalError1" class="modalErrora">Username and Password are required</p>
-        <p id="modalError2" class="modalErrora">Username or Password does not exist</p>
+        <p id="modalError1" class="modalError">Username and Password are required</p>
+        <p id="modalError2" class="modalError">Username or Password does not exist</p>
       </div>
-      <div id="disone" class="modal-line center">
+      <div class="modal-line center">
         <input id="adminUsername" type="text" name="adminUsername" placeholder="Enter your name" />
         <input id="adminPassword" type="password" name="password" placeholder="*****" />
       </div>
@@ -182,6 +179,6 @@
 
 </div>
 
-<script src="main.js"></script>
+<script type="module" src="main.js"></script>
 </body>
 </html>

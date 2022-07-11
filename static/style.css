@@ -617,8 +617,11 @@ body {
   top: 0;
 }
 
-.adminNav {
+.adminCtrl {
+  top: 5px;
+  right: 5px;
   float: right;
+  position: fixed;
 }
 .adminBtn {
   background-color: black;
@@ -666,7 +669,7 @@ body {
   align-self: flex-end;
 }
 
-.modalErrora {
+.modalError {
   visibility: hidden;
   color: red;
 }
