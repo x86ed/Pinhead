@@ -29,6 +29,7 @@ func InitializeRoute() {
 	// router.HandleFunc("/end_game", IsAuthorized(AdminIndex)).Methods("POST")
 	router.HandleFunc("/next_turn", NextTurn).Methods("POST")
 	router.HandleFunc("/high_score", HighScore).Methods("POST")
+	router.HandleFunc("/update_score", UpdateScore).Methods("POST")
 
 	router.HandleFunc("/user", IsAuthorized(UserIndex)).Methods("GET")
 	router.HandleFunc("/buttonpress", echo).Methods("GET")

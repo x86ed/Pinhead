@@ -50,6 +50,33 @@ func NextTurn(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(scores)
 }
 
+func UpdateScore(w http.ResponseWriter, r *http.Request) {
+	connection, _ := GetDatabase()
+	defer CloseDatabase(connection)
+
+	var newScore ScoreUpdate
+
+	err := json.NewDecoder(r.Body).Decode(&newScore)
+	if err != nil {
+		var err Error
+		err = SetError(err, "Error in reading payload.")
+		w.Header().Set("Content-Type", "application/json")
+		json.NewEncoder(w).Encode(err)
+		return
+	}
+	var curGame Game
+	var scores []Score
+	connection.Model(&curGame).Where("in_active = ?", false).First(&curGame)
+	connection.Model(&curGame).Where("in_active = ?", false).Order("updated_at desc").Association("Scores").Find(&scores)
+	for _, v := range scores {
+		if v.User == newScore.ID {
+			connection.Model(&v).Updates(&Score{Score: int64(newScore.Score)})
+		}
+	}
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(scores)
+}
+
 func HighScore(w http.ResponseWriter, r *http.Request) {
 	connection, _ := GetDatabase()
 	defer CloseDatabase(connection)
