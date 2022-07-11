@@ -22,7 +22,14 @@ func InitializeStatic() {
 func InitializeRoute() {
 	router.HandleFunc("/signup", SignUp).Methods("POST")
 	router.HandleFunc("/signin", SignIn).Methods("POST")
-	router.HandleFunc("/admin", IsAuthorized(AdminIndex)).Methods("GET")
+
+	// To migrate to admin
+	// router.HandleFunc("/admin", IsAuthorized(AdminIndex)).Methods("GET")
+	router.HandleFunc("/new_game", NewGame).Methods("POST")
+	// router.HandleFunc("/end_game", IsAuthorized(AdminIndex)).Methods("POST")
+	router.HandleFunc("/next_turn", NextTurn).Methods("POST")
+	router.HandleFunc("/high_score", HighScore).Methods("POST")
+
 	router.HandleFunc("/user", IsAuthorized(UserIndex)).Methods("GET")
 	router.HandleFunc("/buttonpress", echo).Methods("GET")
 	router.Methods("OPTIONS").HandlerFunc(func(w http.ResponseWriter, r *http.Request) {

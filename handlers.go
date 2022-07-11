@@ -66,6 +66,7 @@ func SignUp(w http.ResponseWriter, r *http.Request) {
 	}
 
 	var dbuser User
+	var curGame Game
 	connection.Where("name = ?", user.Name).First(&dbuser)
 
 	//check email is alredy registered or not
@@ -84,12 +85,15 @@ func SignUp(w http.ResponseWriter, r *http.Request) {
 
 	// insert user details in database
 	connection.Create(&user)
+	connection.Model(&curGame).Where("active = ?", true).First(&curGame)
+	connection.Where("name = ?", user.Name).First(&dbuser)
+	connection.Model(&curGame).Where("active = ?", true).Association("Users").Append(&user)
 	w.Header().Set("Content-Type", "application/json")
 	// json.NewEncoder(w).Encode(user)
 
 	// get list of users to return as queued players
 	var users []User
-	connection.Find(&users)
+	connection.Model(&curGame).Association("Users").Find(&users)
 
 	var players []Player
 

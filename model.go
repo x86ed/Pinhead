@@ -24,7 +24,7 @@ func (base *Base) BeforeCreate(db *gorm.DB) error {
 
 type User struct {
 	Base
-	Name     string `json:"name" gorm:"unique"`
+	Name     string `json:"name"`
 	Password string `json:"password"`
 	Role     string `json:"role"`
 	Initials string `json:"initials" gorm:"type:varchar(3)"`

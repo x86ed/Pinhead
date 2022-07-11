@@ -1,11 +1,17 @@
 package main
 
+import "fmt"
+
 // import (
 // 	"time"
 
 // 	"github.com/warthog618/gpiod"
 // 	"github.com/warthog618/gpiod/device/rpi"
 // )
+
+func Initials(abc string) {
+	fmt.Println(abc)
+}
 
 // func Left(d bool) {
 // 	offset1 := rpi.J8p31
