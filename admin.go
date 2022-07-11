@@ -16,8 +16,8 @@ func AdminIndex(w http.ResponseWriter, r *http.Request) {
 func NewGame(w http.ResponseWriter, r *http.Request) {
 	connection, _ := GetDatabase()
 	defer CloseDatabase(connection)
-	var newGame = Game{Active: true}
-	connection.Model(&Game{}).Updates(Game{Active: false})
+	var newGame = Game{}
+	connection.Model(&Game{}).Where("1 == 1").Updates(Game{InActive: true})
 	connection.Create(&newGame)
 	if newGame.ID.String() == "" {
 		var err Error
@@ -35,17 +35,19 @@ func NextTurn(w http.ResponseWriter, r *http.Request) {
 	defer CloseDatabase(connection)
 	var curGame Game
 	var scores []Score
-	connection.Model(&curGame).Where("active = ?", true).Association("Scores").DB.Order("updated_at desc").Find(&scores)
+	connection.Model(&curGame).Where("in_active = ?", false).Order("updated_at desc").Association("Scores").Find(&scores)
 	var setNext bool
 	for _, v := range scores {
-		if v.Active {
+		if v.Active && !v.Complete {
 			setNext = true
-			connection.Model(&v).Updates(&Score{Active: false, Complete: true})
+			connection.Model(&v).Updates(&Score{Complete: true})
 		}
 		if setNext {
 			connection.Model(&v).Updates(&Score{Active: true})
 		}
 	}
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(scores)
 }
 
 func HighScore(w http.ResponseWriter, r *http.Request) {
@@ -53,10 +55,15 @@ func HighScore(w http.ResponseWriter, r *http.Request) {
 	defer CloseDatabase(connection)
 
 	var curGame Game
-	var score Score
+	var scores []Score
 	var user User
-	connection.Model(&curGame).Where("active = ?", true).Association("Scores").DB.Where("active = ?", true).First(&score)
-	connection.Where("id = ?", true).First(&user)
+	connection.Model(&curGame).Where("in_active = ?", false).Order("updated_at desc").Association("Scores").Find(&scores)
+	for _, v := range scores {
+		if v.Active && !v.Complete {
+			connection.Where("id = ?", v.User).First(&user)
+			connection.Model(&v).Updates(&Score{Complete: true})
+		}
+	}
 	//gpio for highscore
 	Initials(user.Initials)
 	NextTurn(w, r)

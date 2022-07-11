@@ -42,7 +42,7 @@ func InitialMigration() error {
 		return err
 	}
 	connection.Migrator().DropTable("GameScore", "GameUser")
-	connection.Create(&Game{Active: true})
+	connection.Create(&Game{})
 	return nil
 }
 

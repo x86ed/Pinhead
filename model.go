@@ -40,7 +40,7 @@ type Score struct {
 
 type Game struct {
 	Base
-	Scores []Score `json:"scores" gorm:"many2many:GameScore"`
-	Active bool    `json:"active"`
-	Users  []User  `json:"users" gorm:"many2many:GameUser"`
+	Scores   []Score `json:"scores" gorm:"many2many:GameScore"`
+	InActive bool    `json:"in_active"`
+	Users    []User  `json:"users" gorm:"many2many:GameUser"`
 }

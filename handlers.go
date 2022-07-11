@@ -26,21 +26,21 @@ func echo(w http.ResponseWriter, r *http.Request) {
 			log.Println("read:", err)
 			break
 		}
-		// sw := string(message)
-		// switch sw {
-		// case "LU":
-		// 	Left(false)
-		// case "RU":
-		// 	Right(false)
-		// case "LD":
-		// 	Left(true)
-		// case "RD":
-		// 	Right(true)
-		// case "L":
-		// 	Launch()
-		// case "S":
-		// 	Start()
-		// }
+		sw := string(message)
+		switch sw {
+		case "LU":
+			Left(false)
+		case "RU":
+			Right(false)
+		case "LD":
+			Left(true)
+		case "RD":
+			Right(true)
+		case "L":
+			Launch()
+		case "S":
+			Start()
+		}
 
 		log.Printf("recv: %s", message)
 		err = c.WriteMessage(mt, message)
@@ -85,15 +85,16 @@ func SignUp(w http.ResponseWriter, r *http.Request) {
 
 	// insert user details in database
 	connection.Create(&user)
-	connection.Model(&curGame).Where("active = ?", true).First(&curGame)
+	connection.Model(&curGame).Where("in_active = ?", false).First(&curGame)
 	connection.Where("name = ?", user.Name).First(&dbuser)
-	connection.Model(&curGame).Where("active = ?", true).Association("Users").Append(&user)
+	connection.Model(&curGame).Where("in_active = ?", false).Association("Users").Append(&user)
+	connection.Model(&curGame).Where("in_active = ?", false).Association("Scores").Append(&Score{User: user.ID})
 	w.Header().Set("Content-Type", "application/json")
 	// json.NewEncoder(w).Encode(user)
 
 	// get list of users to return as queued players
 	var users []User
-	connection.Model(&curGame).Association("Users").Find(&users)
+	connection.Model(&curGame).Order("updated_at desc").Association("Users").Find(&users)
 
 	var players []Player
 
