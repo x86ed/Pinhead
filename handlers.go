@@ -67,6 +67,8 @@ func SignUp(w http.ResponseWriter, r *http.Request) {
 	}
 
 	var dbuser User
+	var curGame Game
+	var scores []Score
 	connection.Where("name = ?", user.Name).First(&dbuser)
 
 	//check email is alredy registered or not
@@ -83,7 +85,7 @@ func SignUp(w http.ResponseWriter, r *http.Request) {
 		err = SetError(err, "Cannot create'admin' accounts")
 		w.Header().Set("Content-Type", "application/json")
 		json.NewEncoder(w).Encode(err)
-		return		
+		return
 	}
 
 	user.Password, err = GenerateHashPassword(user.Password)
@@ -91,10 +93,31 @@ func SignUp(w http.ResponseWriter, r *http.Request) {
 		log.Fatalln("Error in password hashing.")
 	}
 
-	//insert user details in database
+	// insert user details in database
 	connection.Create(&user)
+	connection.Model(&curGame).Where("in_active = ?", false).First(&curGame)
+	connection.Where("name = ?", user.Name).First(&dbuser)
+	connection.Model(&curGame).Where("in_active = ?", false).Association("Users").Append(&user)
+	connection.Model(&curGame).Where("in_active = ?", false).Association("Scores").Append(&Score{User: user.ID})
 	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(user)
+	// json.NewEncoder(w).Encode(user)
+
+	// get list of users to return as queued players
+	var users []User
+	connection.Model(&curGame).Order("updated_at desc").Association("Users").Find(&users)
+	connection.Model(&curGame).Order("updated_at desc").Association("Scores").Find(&scores)
+	var players []Player
+
+	for _, element := range users {
+		players = append(players, Player{Name: element.Name, Initials: element.Initials, Class: GetScoreState(scores, element.ID)})
+	}
+
+	json.NewEncoder(w).Encode(players)
+}
+
+func HandleQueue() {
+	connection, _ := GetDatabase()
+	defer CloseDatabase(connection)
 }
 
 func SignIn(w http.ResponseWriter, r *http.Request) {
@@ -150,14 +173,6 @@ func SignIn(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(token)
 }
 
-func AdminIndex(w http.ResponseWriter, r *http.Request) {
-	if r.Header.Get("Role") != "admin" {
-		w.Write([]byte("Not authorized."))
-		return
-	}
-	w.Write([]byte("Welcome, Admin."))
-}
-
 func UserIndex(w http.ResponseWriter, r *http.Request) {
 	if r.Header.Get("Role") != "user" {
 		w.Write([]byte("Not Authorized."))
@@ -166,7 +181,7 @@ func UserIndex(w http.ResponseWriter, r *http.Request) {
 	w.Write([]byte("Welcome, User."))
 }
 
-func ListUsers (w http.ResponseWriter, r *http.Request) {
+func ListUsers(w http.ResponseWriter, r *http.Request) {
 	var users []User
 
 	connection, _ := GetDatabase()
@@ -185,7 +200,7 @@ func ListUsers (w http.ResponseWriter, r *http.Request) {
 	for _, user := range users {
 		user.MarshalJSON()
 	}
-	
+
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(users)
 }

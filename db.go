@@ -30,17 +30,19 @@ func GetDatabase() (*gorm.DB, error) {
 
 //create user table in userdb
 func InitialMigration() error {
+	allModels := []interface{}{&Score{}, &User{}, &Game{}}
 	connection, err := GetDatabase()
 	if err != nil {
 		return err
 	}
 	defer CloseDatabase(connection)
-	err = connection.AutoMigrate(User{})
+	fmt.Println("Automigrating database.")
+	err = connection.AutoMigrate(allModels...)
 	if err != nil {
 		return err
 	}
-	// connection.AutoMigrate(Score{})
-	// connection.AutoMigrate(Game{})
+	connection.Migrator().DropTable("GameScore", "GameUser")
+	connection.Create(&Game{})
 	return nil
 }
 
@@ -50,6 +52,7 @@ func CloseDatabase(connection *gorm.DB) error {
 	if err != nil {
 		return err
 	}
+	fmt.Println("Closing database connection.")
 	sqldb.Close()
 	return nil
 }

@@ -23,23 +23,32 @@ func InitializeStatic() {
 func InitializeRoute() {
 	router.HandleFunc("/signup", SignUp).Methods("POST")
 	router.HandleFunc("/signin", SignIn).Methods("POST")
+
 	router.HandleFunc("/user", IsAuthorized(UserIndex, false)).Methods("GET")
+
 	router.HandleFunc("/buttonpress", echo).Methods("GET")
 	router.HandleFunc("/users", IsAuthorized(ListUsers, true)).Methods("GET")
-	router.HandleFunc("/admin", IsAuthorized(CreateAdminAccount, true)).Methods("POST")
-	router.HandleFunc("/admin/{userId}", IsAuthorized(DeleteAccount, true)).Methods("DELETE")
-	router.HandleFunc("/logout", IsAuthorized(Logout, false)).Methods("POST")	
+	router.HandleFunc("/logout", IsAuthorized(Logout, false)).Methods("POST")
 	router.Methods("OPTIONS").HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Access-Control-Allow-Origin", "")
 		w.Header().Set("Access-Control-Allow-Methods", "POST, GET, OPTIONS, PUT, DELETE")
 		w.Header().Set("Access-Control-Allow-Headers", "Accept, Content-Type, Content-Length, Accept-Encoding, X-CSRF-Token, Authorization, Access-Control-Request-Headers, Access-Control-Request-Method, Connection, Host, Origin, User-Agent, Referer, Cache-Control, X-header")
 	})
-	
+
 	//local server for admin
-	localRouter.HandleFunc("/admin", CreateAdmin).Methods("POST")	
+	localRouter.HandleFunc("/new_game", NewGame).Methods("POST")
+	localRouter.HandleFunc("/next_turn", NextTurn).Methods("POST")
+	localRouter.HandleFunc("/high_score", HighScore).Methods("POST")
+	localRouter.HandleFunc("/update_score", UpdateScore).Methods("POST")
+
+	localRouter.HandleFunc("/admin", CreateAdmin).Methods("POST")
+
+	localRouter.HandleFunc("/admin", IsAuthorized(CreateAdminAccount, true)).Methods("POST")
+	localRouter.HandleFunc("/admin/{userId}", IsAuthorized(DeleteAccount, true)).Methods("DELETE")
+
 	localRouter.Methods("OPTIONS").HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Access-Control-Allow-Origin", "")
-		w.Header().Set("Access-Control-Allow-Methods", "POST, OPTIONS")
+		w.Header().Set("Access-Control-Allow-Methods", "POST, OPTIONS, DELETE")
 		w.Header().Set("Access-Control-Allow-Headers", "Accept, Content-Type, Content-Length, Accept-Encoding, X-CSRF-Token, Access-Control-Request-Headers, Access-Control-Request-Method, Connection, Host, Origin, User-Agent, Referer, Cache-Control, X-header")
 	})
 
