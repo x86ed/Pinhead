@@ -85,7 +85,7 @@ func SignUp(w http.ResponseWriter, r *http.Request) {
 		err = SetError(err, "Cannot create'admin' accounts")
 		w.Header().Set("Content-Type", "application/json")
 		json.NewEncoder(w).Encode(err)
-		return		
+		return
 	}
 
 	user.Password, err = GenerateHashPassword(user.Password)
@@ -181,7 +181,7 @@ func UserIndex(w http.ResponseWriter, r *http.Request) {
 	w.Write([]byte("Welcome, User."))
 }
 
-func ListUsers (w http.ResponseWriter, r *http.Request) {
+func ListUsers(w http.ResponseWriter, r *http.Request) {
 	var users []User
 
 	connection, _ := GetDatabase()
@@ -200,7 +200,7 @@ func ListUsers (w http.ResponseWriter, r *http.Request) {
 	for _, user := range users {
 		user.MarshalJSON()
 	}
-	
+
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(users)
 }

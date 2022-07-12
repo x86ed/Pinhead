@@ -17,3 +17,20 @@ type Error struct {
 	IsError bool   `json:"is_error"`
 	Message string `json:"message"`
 }
+
+const (
+	user     = "user"
+	expired  = "expired"
+	upcoming = "upcoming"
+)
+
+type Player struct {
+	Name     string
+	Initials string
+	Class    string
+}
+
+type ScoreUpdate struct {
+	ID    uuid.UUID
+	Score int
+}

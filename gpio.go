@@ -9,6 +9,7 @@ import (
 )
 
 func Initials(abc string) {
+	//TODO write initial entry function
 	fmt.Println(abc)
 }
 
