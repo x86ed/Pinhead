@@ -14,5 +14,5 @@ func testHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func TestIsAuthorized(t *testing.T) {
-	IsAuthorized(testHandler)
+	IsAuthorized(testHandler, false)
 }

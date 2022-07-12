@@ -6,6 +6,7 @@ import (
 	"log"
 	"net/http"
 
+	"github.com/gorilla/mux"
 	"github.com/gorilla/websocket"
 )
 
@@ -77,6 +78,14 @@ func SignUp(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
 		json.NewEncoder(w).Encode(err)
 		return
+	}
+
+	if user.Role == "admin" {
+		var err Error
+		err = SetError(err, "Cannot create'admin' accounts")
+		w.Header().Set("Content-Type", "application/json")
+		json.NewEncoder(w).Encode(err)
+		return		
 	}
 
 	user.Password, err = GenerateHashPassword(user.Password)
@@ -170,4 +179,78 @@ func UserIndex(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	w.Write([]byte("Welcome, User."))
+}
+
+func ListUsers (w http.ResponseWriter, r *http.Request) {
+	var users []User
+
+	connection, _ := GetDatabase()
+	defer CloseDatabase(connection)
+
+	result := connection.Find(&users)
+
+	if result.Error != nil {
+		var err Error
+		err = SetError(err, "Failed to get users from the db")
+		w.Header().Set("Content-Type", "application/json")
+		json.NewEncoder(w).Encode(err)
+		return
+	}
+
+	for _, user := range users {
+		user.MarshalJSON()
+	}
+	
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(users)
+}
+
+func (u User) MarshalJSON() ([]byte, error) {
+	// prevent recursion
+	type user User
+	x := user(u)
+	// remove users password so it is not returned to the caller
+	x.Password = ""
+	// returning the initials basically is the same as returning the password
+	x.Initials = ""
+	return json.Marshal(x)
+}
+
+func CreateAdminAccount(w http.ResponseWriter, r *http.Request) {
+	CreateAdmin(w, r)
+}
+
+func DeleteAccount(w http.ResponseWriter, r *http.Request) {
+	connection, _ := GetDatabase()
+	defer CloseDatabase(connection)
+
+	vars := mux.Vars(r)
+	userId := vars["userId"]
+
+	var dbUser User
+	connection.Where("id = ?", userId).First(&dbUser)
+
+	if dbUser.Name == "" {
+		var err Error
+		err = SetError(err, "Username does't exist")
+		w.Header().Set("Content-Type", "application/json")
+		json.NewEncoder(w).Encode(err)
+		return
+	}
+
+	//can't delete self
+	if r.Header.Get("Name") == dbUser.Name {
+		var err Error
+		err = SetError(err, "User can't delete themselves")
+		w.Header().Set("Content-Type", "application/json")
+		json.NewEncoder(w).Encode(err)
+		return
+	}
+
+	connection.Delete(&dbUser)
+}
+
+func Logout(w http.ResponseWriter, r *http.Request) {
+	//JWT tokens typically just expire
+	//are we going to implement something like cookies instead that we can revoke?
 }
