@@ -67,6 +67,7 @@ func SignUp(w http.ResponseWriter, r *http.Request) {
 
 	var dbuser User
 	var curGame Game
+	var scores []Score
 	connection.Where("name = ?", user.Name).First(&dbuser)
 
 	//check email is alredy registered or not
@@ -95,11 +96,11 @@ func SignUp(w http.ResponseWriter, r *http.Request) {
 	// get list of users to return as queued players
 	var users []User
 	connection.Model(&curGame).Order("updated_at desc").Association("Users").Find(&users)
-
+	connection.Model(&curGame).Order("updated_at desc").Association("Scores").Find(&scores)
 	var players []Player
 
 	for _, element := range users {
-		players = append(players, Player{Name: element.Name, Initials: element.Initials})
+		players = append(players, Player{Name: element.Name, Initials: element.Initials, Class: GetScoreState(scores, element.ID)})
 	}
 
 	json.NewEncoder(w).Encode(players)

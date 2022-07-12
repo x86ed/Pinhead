@@ -7,6 +7,7 @@ import (
 
 	"github.com/golang-jwt/jwt"
 	"github.com/joho/godotenv"
+	uuid "github.com/satori/go.uuid"
 	"golang.org/x/crypto/bcrypt"
 )
 
@@ -63,4 +64,16 @@ func GenerateJWT(name, role string) (string, error) {
 	}
 
 	return tokenString, nil
+}
+
+func GetScoreState(s []Score, id uuid.UUID) string {
+	for _, score := range s {
+		if score.Active && score.User == id && score.Complete {
+			return expired
+		}
+		if score.Active && score.User == id {
+			return user
+		}
+	}
+	return upcoming
 }
