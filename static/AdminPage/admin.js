@@ -18,6 +18,8 @@ const deleteUser = () => {
     const deleteUserId = document.getElementById("confirmDeleteUserBtn").value;
     console.log("Delete userId: ", deleteUserId);
     api.deleteUser(deleteUserId);
+    document.getElementById("confirmDeleteUserBtn").value = undefined;
+    document.getElementById("deleteModal").style.display = "none";
 }
 
 document.getElementById("confirmDeleteUserBtn").addEventListener('click', deleteUser);

@@ -149,6 +149,7 @@ document.querySelector("body").onload = function(evt) {
 
 /*
 these look unused
+
 document.getElementById("send").onclick = function() {
     if (!ws) {
         return false;

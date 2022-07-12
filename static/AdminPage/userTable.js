@@ -65,11 +65,6 @@ document.addEventListener('bx-pagination-changed-current', ({ detail }) => {
   table.state.setStart(detail.start);
 });
   
-// event listener for pagination event
-document.addEventListener('bx-page-sizes-select-changed', ({ detail }) => {
-  table.state.setPageSize(detail.value);
-});
-  
 // returns pagination component
 function _renderPagination() {
   const { pageSize, start } = table.state;
@@ -79,15 +74,11 @@ function _renderPagination() {
   
   return `
     <bx-pagination
+      class="paginationNoScroll"
       page-size="${pageSize}"
       start="${start}"
       total="${rows.length}"
     >
-      <bx-page-sizes-select slot="page-sizes-select">
-        <option value="10">10</option>
-        <option value="20">20</option>
-      </bx-page-sizes-select>
-      <bx-pages-select></bx-pages-select>
     </bx-pagination>
   `;
 }
@@ -109,7 +100,7 @@ const table = () => {
   }
   
   return `
-    <bx-table>
+    <bx-table size="compact">
       <bx-table-head>
         <bx-table-header-row>
           ${columns
@@ -139,7 +130,7 @@ const table = () => {
               })
             .join('')}
           <bx-table-cell>
-            <button class="confirmDeleteUserBtn" username="${row.name}" userId="${row.id}">
+            <button class="confirmDeleteUserBtn deleteBtn" username="${row.name}" userId="${row.id}">
               <i class="fa fa-trash"></i>
             </button>
           </bx-table-cell>

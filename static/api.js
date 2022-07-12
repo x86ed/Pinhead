@@ -86,8 +86,18 @@ export async function getUsers() {
     };
 }
 
-export function deleteUser(userId) {
+export const deleteUser = (userId) => {
 
+    const requestOptions = {
+        method: 'DELETE',
+        headers: defaultHeaders(true),
+        redirect: 'follow'
+    };
+  
+    fetch(baseUrl + "admin/" + userId, requestOptions)
+    .then(response => response.text())
+    .then(result => console.log(result))
+    .catch(error => console.log('error', error));
 }
 
 export const getSocketURI = () => {

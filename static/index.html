@@ -99,7 +99,7 @@
   <div class="container checkcontainer" >
     <div class="adminCtrl">
         <button id="openAdminSignin" class="adminBtn">
-          <i class="fa fa-gamepad"></i>
+          <i class="adminIcn fa fa-gamepad"></i>
         </button>
     </div>
     <div class="control-group">
@@ -160,9 +160,10 @@
 </slider>
 </div>
 
-<div id="adminModal" class="adminSigninModal">
+    <!-- Modal is used for admin signin-->
+<div id="adminModal" class="modal">
   <div class="modal-content">
-      <div class="modal-line start">
+      <div class="modal-line center">
         <p>Admin sign in:</p>
         <p id="modalError1" class="modalError">Username and Password are required</p>
         <p id="modalError2" class="modalError">Username or Password does not exist</p>
@@ -172,8 +173,8 @@
         <input id="adminPassword" type="password" name="password" placeholder="*****" />
       </div>
       <div class="modal-line end">
-        <button id="aModalCancel">Cancel</button>
-        <button id="aModalSubmit">Goto Admin Page</button>
+        <button class="modalBtn" id="aModalCancel">Cancel</button>
+        <button class="modalBtn" id="aModalSubmit">Goto Admin Page</button>
       </div>
   </div>
 

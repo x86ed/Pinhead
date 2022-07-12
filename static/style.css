@@ -623,42 +623,42 @@ body {
   float: right;
   position: fixed;
 }
+
 .adminBtn {
   background-color: black;
   color: grey;
   border-color: #122f3d;
   border-style: solid;
 }
-.adminSigninModal {
-  display: none; /* Hidden by default */
-  position: fixed; /* Stay in place */
-  z-index: 1; /* Sit on top */
-  padding-top: 100px; /* Location of the box */
+
+.adminIcn.fa{
+  font-size: medium;
+}
+
+.modal {
+  display: none;
+  position: fixed;
+  z-index: 1;
+  padding-top: 30px;
   left: 0;
   top: 0;
-  width: 100%; /* Full width */
-  height: 100%; /* Full height */
-  overflow: auto; /* Enable scroll if needed */
-  background-color: rgb(0,0,0); /* Fallback color */
-  background-color: rgba(0,0,0,0.4); /* Black w/ opacity */
+  width: 100%;
+  height: 100%;
+  overflow: auto;
 }
+
 .modal-content {
   display: flex;
   flex-direction: column;
-  color: #000;
-  background-color: #fefefe;
-  margin: auto;
-  padding: 20px;
-  border: 1px solid #888;
-  width: 80%;
+  color: white;
+  background: #09091c;
+  margin-left: 15px;
+  margin-right: 15px;
+  border: 6px solid #122f3d;
 }
 
 .modal-line {
   padding: 5px;
-}
-
-.modal-line.start {
-  align-self: flex-start;
 }
 
 .modal-line.center {
@@ -672,6 +672,10 @@ body {
 .modalError {
   visibility: hidden;
   color: red;
+}
+
+.modalBtn {
+  border-radius: 5px;
 }
 /**
 * Round switch button in css with animation cleaned up,
