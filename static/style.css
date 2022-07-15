@@ -634,71 +634,10 @@ button#signup-button {
   top: 0;
 }
 
-.adminCtrl {
-  top: 5px;
-  right: 5px;
-  float: right;
-  position: fixed;
-}
-
-.adminBtn {
-  background-color: black;
-  color: grey;
-  border-color: #122f3d;
-  border-style: solid;
-}
-
-.adminIcn.fa{
-  font-size: medium;
-}
-
-.modal {
-  display: none;
-  position: fixed;
-  z-index: 1;
-  padding-top: 30px;
-  left: 0;
-  top: 0;
-  width: 100%;
-  height: 100%;
-  overflow: auto;
-}
-
-.modal-content {
-  display: flex;
-  flex-direction: column;
-  color: white;
-  background: #09091c;
-  margin-left: 15px;
-  margin-right: 15px;
-  border: 6px solid #122f3d;
-}
-
-.modal-line {
-  padding: 5px;
-}
-
-.modal-line.center {
-  align-self: center;
-}
-
-.modal-line.end {
-  align-self: flex-end;
-}
-
-.modalError {
-  visibility: hidden;
-  color: red;
-}
-
-.modalBtn {
-  border-radius: 5px;
-}
 /**
 * Round switch button in css with animation cleaned up,
 as seen on:
 https://psd.tutsplus.com/tutorials/interface-tutorials/round-switch-button/
-
 Use box-shadow for inner-div's sharp-bottom-highight and border-gradient on top
 */
 .switch {

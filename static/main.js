@@ -69,9 +69,25 @@ const requestOptions = {
   redirect: 'follow'
 };
 
+fetch("http://localhost:8080/user", requestOptions)
+  .then(response => response.text())
+  .then(result => console.log(result))
+  .catch(error => console.log('error', error));
+
+const getSocketURI = () => {
+    let loc = window.location, new_uri;
+    if (loc.protocol === "https:") {
+        new_uri = "wss:";
+    } else {
+        new_uri = "ws:";
+    }
+    new_uri += "//" + loc.host;
+    new_uri += loc.pathname + "buttonpress";
+    return new_uri;
+}
+
 let output = document.getElementById("output");
 let input = document.getElementById("input");
-
 let ws;
 
 const sendS = () =>{
@@ -132,7 +148,7 @@ document.querySelector("body").onload = (evt) => {
     if (ws) {
         return false;
     }
-    ws = new WebSocket(api.getSocketURI());
+    ws = new WebSocket(getSocketURI());
     ws.onopen = function(evt) {
         console.log("OPEN");
     }
@@ -173,7 +189,6 @@ const handleSignUp = (event) => {
     if (!name.length || !initials.length){
         return;
     }
-
     document.getElementById("name").value = '';
     document.getElementById("initials").value = '';
     
