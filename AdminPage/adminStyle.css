@@ -1,0 +1,49 @@
+body, html {
+    width: 100vw;
+    height: 100vh;
+  }
+
+  .adminPageBody {
+    justify-content: center;
+    display: flex;
+    overflow-y: auto;
+    flex-direction: column;
+    justify-content: flex-start;
+    background-color: grey;
+  }
+  
+
+  .signin {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    border: black;
+    align-self: center;
+    border-style: solid;
+    border-width: medium;
+    width: fit-content;
+    padding: 20px;
+  }
+
+  .signinInput {
+    outline: auto;
+    width: auto;
+  }
+
+  .signinBtn {
+    margin: 5px;
+    border-radius: 5px;
+  }
+
+  .table {
+    margin: 20px;
+  }
+
+  .paginationNoScroll {
+    overflow-y: hidden;
+  }
+
+  .sError {
+    color: darkred;
+    visibility: collapse;
+  }

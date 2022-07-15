@@ -1,4 +1,4 @@
-import { getUsers } from "../api.js";
+import { getUsers } from "./api.js";
 import { confirmDeleteUser } from "./admin.js";
 
 const TABLE_SORT_DIRECTION = {
@@ -11,16 +11,13 @@ const columns = [
   {
     id: 'name',
     title: 'Name',
+    sortCycle: 'tri-states-from-ascending',
   },
   {
     id: 'role',
     title: 'Role',
     sortCycle: 'tri-states-from-ascending',
   },
-  {
-    id: 'highscore',
-    title: 'Score',
-    },
 ];
 
 var rows;
@@ -178,14 +175,13 @@ async function updateTree() {
     var users = await getUsers();
     if (users.isError) {
       console.log("token has expired");
-      window.location.href="unauthorized.html";
+      window.location.href="signin.html";
     }
     rows = users.map(function (user) {
       return {
         id: user.ID,
         name: user.name,
-        role: user.role,
-        highscore: 1000 //TODO: do we want to include the highscore, only admins can see this so maybe not useful
+        role: user.role
       }
     });
     tableReady.innerHTML = table();

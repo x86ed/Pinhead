@@ -1,11 +1,17 @@
 package main
 
 import (
+	"fmt"
 	"time"
 
 	"github.com/warthog618/gpiod"
 	"github.com/warthog618/gpiod/device/rpi"
 )
+
+func Initials(abc string) {
+	//TODO write initial entry function
+	fmt.Println(abc)
+}
 
 func Left(d bool) {
 	offset1 := rpi.J8p31

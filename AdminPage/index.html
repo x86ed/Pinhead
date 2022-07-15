@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Admin Page</title>
+    <script type="module" src="https://1.www.s81c.com/common/carbon/web-components/tag/latest/accordion.min.js"></script>
+    <script type="module" src="https://1.www.s81c.com/common/carbon/web-components/tag/latest/data-table.min.js"></script>
+    <script type="module" src="https://1.www.s81c.com/common/carbon/web-components/tag/latest/pagination.min.js"></script>
+    <script type="module" src="https://1.www.s81c.com/common/carbon/web-components/tag/latest/tabs.min.js"></script>
+    <script type="module" src="https://1.www.s81c.com/common/carbon/web-components/tag/latest/modal.min.js"></script>
+    <script type="module" src="https://1.www.s81c.com/common/carbon/web-components/tag/latest/button.min.js"></script>
+    <link rel="stylesheet" href="https://1.www.s81c.com/common/carbon-for-ibm-dotcom/tag/v1/latest/themes.css" />
+    <link rel="stylesheet" href="https://1.www.s81c.com/common/carbon-for-ibm-dotcom/tag/v1/latest/plex.css"/>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+    <link href="adminStyle.css" rel="stylesheet">
+    <script>
+        // user must be authenticated and admin to be here
+        let token = sessionStorage.getItem('jwtToken');
+        let role = sessionStorage.getItem('userRole');
+        if (token === null || token === undefined || role !== "admin")
+        {
+          window.location.href="signin.html";
+        }
+  </script>
+  </head>
+  <body class="adminPageBody">
+    <bx-tabs
+    trigger-content="Select an item"
+    value="home"
+    type="container"
+    class="dds-theme-zone-g90"
+  >
+    <bx-tab id="tab-home" target="panel-home" value="home">Home</bx-tab>
+    <bx-tab id="tab-userTable" target="panel-userTable" value="userTable">User Table</bx-tab>
+  </bx-tabs>
+  <div>
+    <div id="panel-home" role="tabpanel" aria-labelledby="tab-home" hidden>
+      <h4>Ace Pinball Palace Admin Controls Page</h4>
+    </div>
+    <div id="panel-userTable" role="tabpanel" aria-labelledby="tab-userTable" hidden>
+      <div id="users-table" class="table dds-theme-zone-g90"></div>
+    </div>
+  </div>   
+
+  <!-- Modal is used for confirming user should be deleted-->
+  <bx-modal id="modal-delete">
+    <bx-modal-header>
+      <bx-modal-close-button></bx-modal-close-button>
+      <bx-modal-heading>Confirm Delete</bx-modal-heading>
+    </bx-modal-header>
+    <bx-modal-body><p id="deleteUserText"></p></bx-modal-body>
+    <bx-modal-footer>
+      <bx-modal-footer-button kind="secondary" data-modal-close>Cancel</bx-modal-footer-button>
+      <bx-modal-footer-button kind="primary" id="confirmDeleteUserBtn">Delete</bx-modal-footer-button>
+    </bx-modal-footer>
+  </bx-modal>
+
+</div>
+<script type="module" src="admin.js"></script>
+<script type="module" src="userTable.js"></script>
+  </body>
+</html>

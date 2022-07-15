@@ -2,14 +2,13 @@
 <html lang="en" >
 <head>
   <meta charset="UTF-8">
-  <title>CodePen - CSS arcade button</title>
+  <title>Ace's Pinball Palace</title>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/modernizr/2.8.3/modernizr.min.js" type="text/javascript"></script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/normalize/5.0.0/normalize.min.css">
   <link rel="stylesheet" href="style.css">
   <link rel="stylesheet" href="fonts/style.css">
   <link rel="preconnect" href="https://fonts.googleapis.com"> 
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
   <link href="https://fonts.googleapis.com/css2?family=Catamaran:wght@900&display=swap" rel="stylesheet">
 </head>
 
@@ -96,21 +95,17 @@
             fill="freeze"
             />
           </svg>
-  <div class="container checkcontainer" >
-    <div class="adminCtrl">
-        <button id="openAdminSignin" class="adminBtn">
-          <i class="adminIcn fa fa-gamepad"></i>
-        </button>
-    </div>
+  <form id="signup-box" action="" method="post" class="container checkcontainer" >
     <div class="control-group">
-      <input id="input" type="text" name="input" placeholder="Enter your name" />
-      <label for="input">name</label>
+        <input id="name" type="text" name="name" placeholder="Enter your name" required />
+        <label for="name">name</label>
     </div>
-      <div class="control-group small">
-      <input id="initals" type="text" name="initals" placeholder="ACE" />
-      <label for="input">three letter initials</label>
+    <div class="control-group small">
+        <input id="initials" type="text" name="initials" placeholder="ACE"  maxlength="3" required />
+        <label for="initials">three letter initials</label>
     </div>
-    <!-- power switch -->
+    <button id="signup-button" type="button">[Signup]</button>
+      <!-- power switch -->
     <!-- <div class="switch">  
       <div class=round>
         <input type=checkbox id=onoff name=onoff/>
@@ -122,11 +117,11 @@
         </div>
       </div>
     </div> -->
-  </div>
+</form>
 
 <div class="queue checkcontainer">
 <h3>Queue</h3>
-<ol>
+<ol id="queue-list">
 <li class="expired">Ace - ACE</li>
 <li class="expired">Adam - ABS</li>
 <li class="user">Pinocchio - CAP</li>
@@ -159,27 +154,8 @@
 </div>
 </slider>
 </div>
-
-    <!-- Modal is used for admin signin-->
-<div id="adminModal" class="modal">
-  <div class="modal-content">
-      <div class="modal-line center">
-        <p>Admin sign in:</p>
-        <p id="modalError1" class="modalError">Username and Password are required</p>
-        <p id="modalError2" class="modalError">Username or Password does not exist</p>
-      </div>
-      <div class="modal-line center">
-        <input id="adminUsername" type="text" name="adminUsername" placeholder="Enter your name" />
-        <input id="adminPassword" type="password" name="password" placeholder="*****" />
-      </div>
-      <div class="modal-line end">
-        <button class="modalBtn" id="aModalCancel">Cancel</button>
-        <button class="modalBtn" id="aModalSubmit">Goto Admin Page</button>
-      </div>
-  </div>
-
 </div>
 
-<script type="module" src="main.js"></script>
+<script src="main.js"></script>
 </body>
 </html>

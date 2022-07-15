@@ -1,48 +1,6 @@
 package main
 
-import (
-	"time"
-
-	uuid "github.com/satori/go.uuid"
-	"gorm.io/gorm"
-)
-
-type Base struct {
-	ID        uuid.UUID `gorm:"type:uuid;primary_key;"`
-	CreatedAt time.Time
-	UpdatedAt time.Time
-	DeletedAt *time.Time `sql:"index"`
-}
-
-// BeforeCreate will set a UUID rather than numeric ID.
-func (base *Base) BeforeCreate(db *gorm.DB) error {
-	base.ID = uuid.NewV4()
-
-	return nil
-}
-
-type User struct {
-	Base
-	Name     string `gorm:"unique" json:"name"`
-	Password string `json:"password,omitempty"`
-	Role     string `json:"role"`
-	Initials string `json:"initials,omitempty"`
-}
-
-type Score struct {
-	Base
-	User     uuid.UUID `json:"user"`
-	Score    int64     `json:"score"`
-	Complete bool      `json:"complete"`
-	Active   bool      `json:"active"`
-}
-
-type Game struct {
-	Base
-	Scores  []Score
-	Active  bool `json:"active"`
-	Players []User
-}
+import uuid "github.com/satori/go.uuid"
 
 type Authentication struct {
 	Name     string `json:"name"`
@@ -56,6 +14,23 @@ type Token struct {
 }
 
 type Error struct {
-	IsError bool   `json:"isError"`
+	IsError bool   `json:"is_error"`
 	Message string `json:"message"`
+}
+
+const (
+	user     = "user"
+	expired  = "expired"
+	upcoming = "upcoming"
+)
+
+type Player struct {
+	Name     string
+	Initials string
+	Class    string
+}
+
+type ScoreUpdate struct {
+	ID    uuid.UUID
+	Score int
 }
