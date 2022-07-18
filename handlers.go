@@ -205,14 +205,45 @@ func ListUsers(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(users)
 }
 
+func ListAdmins(w http.ResponseWriter, r *http.Request) {
+	var admins []Admin
+
+	connection, _ := GetDatabase()
+	defer CloseDatabase(connection)
+
+	result := connection.Find(&admins)
+
+	if result.Error != nil {
+		var err Error
+		err = SetError(err, "Failed to get users from the db")
+		w.Header().Set("Content-Type", "application/json")
+		json.NewEncoder(w).Encode(err)
+		return
+	}
+
+	for _, admin := range admins {
+		admin.MarshalJSON()
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(admins)
+}
+
+func (a Admin) MarshalJSON() ([]byte, error) {
+	// prevent recursion
+	type admin Admin
+	x := admin(a)
+	// remove users password so it is not returned to the caller
+	x.Password = ""
+	return json.Marshal(x)
+}
+
 func (u User) MarshalJSON() ([]byte, error) {
 	// prevent recursion
 	type user User
 	x := user(u)
 	// remove users password so it is not returned to the caller
 	x.Password = ""
-	// returning the initials basically is the same as returning the password
-	x.Initials = ""
 	return json.Marshal(x)
 }
 

@@ -13,6 +13,8 @@ var (
 	router       *mux.Router
 	localRouter  *mux.Router
 	secretkey, _ = GoDotEnvVariable("JWTKEY")
+	adminUser, _ = GoDotEnvVariable("ADMINEMAIL")
+	adminPass, _ = GoDotEnvVariable("ADMINPASS")
 )
 
 func main() {

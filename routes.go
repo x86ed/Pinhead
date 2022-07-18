@@ -37,6 +37,7 @@ func InitializeRoute() {
 
 	//local server for admin
 	localRouter.HandleFunc("/users", IsAuthorized(ListUsers, true)).Methods("GET")
+	localRouter.HandleFunc("/admins", IsAuthorized(ListAdmins, true)).Methods("GET")
 
 	localRouter.HandleFunc("/new_game", IsAuthorized(NewGame, true)).Methods("POST")
 	localRouter.HandleFunc("/next_turn", IsAuthorized(NextTurn, true)).Methods("POST")
