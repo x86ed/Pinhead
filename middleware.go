@@ -11,16 +11,12 @@ import (
 
 // using user jwt key
 func IsAuthorizedUser (handler http.HandlerFunc) http.HandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request) {
-		IsAuthorized(handler, userSecretKey)
-	}
+	return IsAuthorized(handler, userSecretKey)
 }
 
 // using admin jwt key
 func IsAuthorizedAdmin (handler http.HandlerFunc) http.HandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request) {
-		IsAuthorized(handler, adminSecretKey)
-	}
+	return IsAuthorized(handler, adminSecretKey)
 }
 
 // check jwt for authorization

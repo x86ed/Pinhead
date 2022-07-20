@@ -25,7 +25,7 @@ export async function adminSignin(name, password) {
     };
 
     try {
-        var response = await fetch(baseUrl + "adminsignin", requestOptions)
+        var response = await fetch(baseUrl + "signin", requestOptions)
         var result = await response.text();
         var authUser = JSON.parse(result);
         sessionStorage.setItem("userName", authUser.name);
