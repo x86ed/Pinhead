@@ -15,7 +15,7 @@ import (
 func GoDotEnvVariable(key string) (string, error) {
 
 	// load .env file
-	err := godotenv.Load(".env")
+	err := godotenv.Load(".env.example")
 
 	if err != nil {
 		return "", err
@@ -49,8 +49,9 @@ func CheckPasswordHash(password, hash string) bool {
 }
 
 // Generate JWT token
-func GenerateJWT(name, role string) (string, error) {
-	var mySigningKey = []byte(secretkey)
+func GenerateJWT(name, role string, secretKey string) (string, error) {
+	var mySigningKey = []byte(secretKey);
+	
 	token := jwt.New(jwt.SigningMethodHS256)
 	claims := token.Claims.(jwt.MapClaims)
 	claims["authorized"] = true

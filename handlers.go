@@ -120,7 +120,16 @@ func HandleQueue() {
 	defer CloseDatabase(connection)
 }
 
-func SignIn(w http.ResponseWriter, r *http.Request) {
+func UserSignIn(w http.ResponseWriter, r *http.Request) {
+	SignIn(w, r, false)
+}
+
+func AdminSignIn(w http.ResponseWriter, r *http.Request) {
+	SignIn(w, r, true)
+}
+
+//signin in the same action for users and admins but with different secretkey credentials
+func SignIn(w http.ResponseWriter, r *http.Request, adminSignIn bool) {
 	connection, _ := GetDatabase()
 	defer CloseDatabase(connection)
 
@@ -146,6 +155,22 @@ func SignIn(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	//admin signing user mst be an admin
+	if (adminSignIn && authUser.Role != "admin") {
+		var err Error
+		err = SetError(err, "User does not have the appropriate role")
+		w.Header().Set("Content-Type", "application/json")
+		json.NewEncoder(w).Encode(err)
+		return
+	} 
+	if (!adminSignIn && authUser.Role != "user") {
+		var err Error
+		err = SetError(err, "User does not have the appropriate role")
+		w.Header().Set("Content-Type", "application/json")
+		json.NewEncoder(w).Encode(err)
+		return
+	}
+
 	check := CheckPasswordHash(authDetails.Password, authUser.Password)
 
 	if !check {
@@ -156,7 +181,14 @@ func SignIn(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	validToken, err := GenerateJWT(authUser.Name, authUser.Role)
+	var secretKey string
+	if (adminSignIn) {
+		secretKey = adminSecretKey
+	} else {
+		secretKey = userSecretKey
+	}
+
+	validToken, err := GenerateJWT(authUser.Name, authUser.Role, secretKey)
 	if err != nil {
 		var err Error
 		err = SetError(err, "Failed to generate token")

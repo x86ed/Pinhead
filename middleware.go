@@ -9,8 +9,22 @@ import (
 	"github.com/golang-jwt/jwt"
 )
 
-//check whether user is authorized or not
-func IsAuthorized(handler http.HandlerFunc, requireAdmin bool) http.HandlerFunc {
+// using user jwt key
+func IsAuthorizedUser (handler http.HandlerFunc) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		IsAuthorized(handler, userSecretKey)
+	}
+}
+
+// using admin jwt key
+func IsAuthorizedAdmin (handler http.HandlerFunc) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		IsAuthorized(handler, adminSecretKey)
+	}
+}
+
+// check jwt for authorization
+func IsAuthorized(handler http.HandlerFunc, secretKey string) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 
 		if r.Header["Authorization"] == nil {
@@ -20,8 +34,7 @@ func IsAuthorized(handler http.HandlerFunc, requireAdmin bool) http.HandlerFunc 
 			return
 		}
 
-		var mySigningKey = []byte(secretkey)
-
+		var mySigningKey = []byte(adminSecretKey)
 		token, err := jwt.Parse(strings.Replace(r.Header["Authorization"][0], "Bearer ", "", 1), func(token *jwt.Token) (interface{}, error) {
 			if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
 				return nil, fmt.Errorf("There was an error in parsing token.")
@@ -37,23 +50,17 @@ func IsAuthorized(handler http.HandlerFunc, requireAdmin bool) http.HandlerFunc 
 		}
 
 		if claims, ok := token.Claims.(jwt.MapClaims); ok && token.Valid {
-			if requireAdmin && claims["role"] != "admin" {
-				var err Error
-				err = SetError(err, "Admin access is required.")
-				json.NewEncoder(w).Encode(err)
+			r.Header.Set("Name", fmt.Sprintf("%v", claims["name"]))
+			if claims["role"] == "admin" {
+				r.Header.Set("Role", "admin")
+				handler.ServeHTTP(w, r)
 				return
-			} else {
-				r.Header.Set("Name", fmt.Sprintf("%v", claims["name"]))
-				if claims["role"] == "admin" {
-					r.Header.Set("Role", "admin")
-					handler.ServeHTTP(w, r)
-					return
-				} else if claims["role"] == "user" {
-					r.Header.Set("Role", "user")
-					handler.ServeHTTP(w, r)
-					return
-				}
+			} else if claims["role"] == "user" {
+				r.Header.Set("Role", "user")
+				handler.ServeHTTP(w, r)
+				return
 			}
+			// if the role claim is unknown then user will not be authorized
 		}
 		var reserr Error
 		SetError(reserr, "Not Authorized.")
