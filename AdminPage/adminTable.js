@@ -1,4 +1,4 @@
-import { getUsers } from "./api.js";
+import { getAdmins } from "./api.js";
 import { confirmDeleteUser } from "./admin.js";
 
 const TABLE_SORT_DIRECTION = {
@@ -170,9 +170,9 @@ table.state = {
   }
 
 async function updateTree() {
-  var tableReady = document.getElementById('users-table');
+  var tableReady = document.getElementById('admins-table');
   if (tableReady) {
-    var users = await getUsers();
+    var users = await getAdmins();
     if (users == null || users == undefined || users.is_error) {
       console.log("token has expired");
       window.location.href="signin.html";

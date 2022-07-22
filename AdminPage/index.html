@@ -30,11 +30,15 @@
     class="dds-theme-zone-g90"
   >
     <bx-tab id="tab-home" target="panel-home" value="home">Home</bx-tab>
+    <bx-tab id="tab-adminTable" target="panel-adminTable" value="adminTable">Admin Table</bx-tab>
     <bx-tab id="tab-userTable" target="panel-userTable" value="userTable">User Table</bx-tab>
   </bx-tabs>
   <div>
     <div id="panel-home" role="tabpanel" aria-labelledby="tab-home" hidden>
       <h4>Ace Pinball Palace Admin Controls Page</h4>
+    </div>
+    <div id="panel-adminTable" role="tabpanel" aria-labelledby="tab-adminTable" hidden>
+      <div id="admins-table" class="table dds-theme-zone-g90"></div>
     </div>
     <div id="panel-userTable" role="tabpanel" aria-labelledby="tab-userTable" hidden>
       <div id="users-table" class="table dds-theme-zone-g90"></div>
@@ -57,5 +61,6 @@
 </div>
 <script type="module" src="admin.js"></script>
 <script type="module" src="userTable.js"></script>
+<script type="module" src="adminTable.js"></script>
   </body>
 </html>

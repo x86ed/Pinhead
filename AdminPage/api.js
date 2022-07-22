@@ -56,6 +56,24 @@ export async function getUsers() {
     };
 }
 
+export async function getAdmins() {
+    const requestOptions = {
+    method: 'GET',
+    headers: defaultHeaders(true),
+    redirect: 'follow'
+    };
+
+    try {
+        var response = await fetch(baseUrl + "admins", requestOptions)
+        var result = await response.text();
+        var authUser = JSON.parse(result);
+        return authUser;
+    }
+    catch (error) {
+        console.log('error', error);
+    };
+}
+
 export const deleteUser = (userId) => {
     const requestOptions = {
         method: 'DELETE',
