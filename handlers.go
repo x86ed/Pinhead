@@ -120,16 +120,60 @@ func HandleQueue() {
 	defer CloseDatabase(connection)
 }
 
-func UserSignIn(w http.ResponseWriter, r *http.Request) {
-	SignIn(w, r, false)
-}
-
 func AdminSignIn(w http.ResponseWriter, r *http.Request) {
-	SignIn(w, r, true)
+	connection, _ := GetDatabase()
+	defer CloseDatabase(connection)
+
+	var authDetails AdminAuthentication
+
+	err := json.NewDecoder(r.Body).Decode(&authDetails)
+	if err != nil {
+		var err Error
+		err = SetError(err, "Error in reading payload.")
+		w.Header().Set("Content-Type", "application/json")
+		json.NewEncoder(w).Encode(err)
+		return
+	}
+
+	var authUser Admin
+	connection.Where("email = 	?", authDetails.Email).First(&authUser)
+
+	if authUser.Email == "" {
+		var err Error
+		err = SetError(err, "Username or Password is incorrect")
+		w.Header().Set("Content-Type", "application/json")
+		json.NewEncoder(w).Encode(err)
+		return
+	}
+
+	check := CheckPasswordHash(authDetails.Password, authUser.Password)
+
+	if !check {
+		var err Error
+		err = SetError(err, "Username or Password is incorrect")
+		w.Header().Set("Content-Type", "application/json")
+		json.NewEncoder(w).Encode(err)
+		return
+	}
+
+	validToken, err := GenerateAdminJWT(authUser.Email)
+	if err != nil {
+		var err Error
+		err = SetError(err, "Failed to generate token")
+		w.Header().Set("Content-Type", "application/json")
+		json.NewEncoder(w).Encode(err)
+		return
+	}
+
+	var token AdminToken
+	token.Email = authUser.Email
+	token.TokenString = validToken
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(token)
 }
 
 //signin in the same action for users and admins but with different secretkey credentials
-func SignIn(w http.ResponseWriter, r *http.Request, adminSignIn bool) {
+func UserSignIn(w http.ResponseWriter, r *http.Request) {
 	connection, _ := GetDatabase()
 	defer CloseDatabase(connection)
 
@@ -155,22 +199,6 @@ func SignIn(w http.ResponseWriter, r *http.Request, adminSignIn bool) {
 		return
 	}
 
-	//admin signing user mst be an admin
-	if (adminSignIn && authUser.Role != "admin") {
-		var err Error
-		err = SetError(err, "User does not have the appropriate role")
-		w.Header().Set("Content-Type", "application/json")
-		json.NewEncoder(w).Encode(err)
-		return
-	} 
-	if (!adminSignIn && authUser.Role != "user") {
-		var err Error
-		err = SetError(err, "User does not have the appropriate role")
-		w.Header().Set("Content-Type", "application/json")
-		json.NewEncoder(w).Encode(err)
-		return
-	}
-
 	check := CheckPasswordHash(authDetails.Password, authUser.Password)
 
 	if !check {
@@ -181,14 +209,7 @@ func SignIn(w http.ResponseWriter, r *http.Request, adminSignIn bool) {
 		return
 	}
 
-	var secretKey string
-	if (adminSignIn) {
-		secretKey = adminSecretKey
-	} else {
-		secretKey = userSecretKey
-	}
-
-	validToken, err := GenerateJWT(authUser.Name, authUser.Role, secretKey)
+	validToken, err := GenerateUserJWT(authUser.Name, authUser.Role)
 	if err != nil {
 		var err Error
 		err = SetError(err, "Failed to generate token")

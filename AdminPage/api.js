@@ -13,7 +13,7 @@ const defaultHeaders = (includeAuth) => {
 
 export async function adminSignin(name, password) {
     const raw = JSON.stringify({
-        "name": name,
+        "email": name,
         "password": password,
     });
 
@@ -28,8 +28,7 @@ export async function adminSignin(name, password) {
         var response = await fetch(baseUrl + "signin", requestOptions)
         var result = await response.text();
         var authUser = JSON.parse(result);
-        sessionStorage.setItem("userName", authUser.name);
-        sessionStorage.setItem("userRole", authUser.role);
+        sessionStorage.setItem("userEmail", authUser.email);
         sessionStorage.setItem("jwtToken", authUser.token);
         return authUser;
     }

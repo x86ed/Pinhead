@@ -44,7 +44,7 @@ func TestCheckPasswordHash(t *testing.T) {
 }
 
 func TestGenerateUserJWT(t *testing.T) {
-	s, err := GenerateJWT("test", "user", userSecretKey)
+	s, err := GenerateUserJWT("test", "user")
 	if err != nil {
 		t.Error("JWT failed")
 	}

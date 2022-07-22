@@ -15,8 +15,8 @@
     <script>
         // user must be authenticated and admin to be here
         let token = sessionStorage.getItem('jwtToken');
-        let role = sessionStorage.getItem('userRole');
-        if (token === null || token === undefined || role !== "admin")
+        let email = sessionStorage.getItem('email');
+        if (token === null || token === undefined || role !== "email")
         {
           window.location.href="signin.html";
         }

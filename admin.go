@@ -100,7 +100,7 @@ func CreateAdmin(w http.ResponseWriter, r *http.Request) {
 	connection, _ := GetDatabase()
 	defer CloseDatabase(connection)
 
-	var user User
+	var user Admin
 	err := json.NewDecoder(r.Body).Decode(&user)
 	if err != nil {
 		var err Error
@@ -110,21 +110,13 @@ func CreateAdmin(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	var dbuser User
-	connection.Where("name = ?", user.Name).First(&dbuser)
+	var dbuser Admin
+	connection.Where("name = ?", user.Email).First(&dbuser)
 
 	//check email is already registered or not
-	if dbuser.Name != "" {
+	if dbuser.Email != "" {
 		var err Error
 		err = SetError(err, "Email already in use")
-		w.Header().Set("Content-Type", "application/json")
-		json.NewEncoder(w).Encode(err)
-		return
-	}
-
-	if user.Role == "user" {
-		var err Error
-		err = SetError(err, "Cannot create 'user' accounts")
 		w.Header().Set("Content-Type", "application/json")
 		json.NewEncoder(w).Encode(err)
 		return

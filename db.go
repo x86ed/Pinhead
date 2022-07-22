@@ -47,7 +47,7 @@ func InitialMigration() error {
 	connection.Where("email = ?", adminUser).First(&firstAdmin)
 
 	//check email is alredy registered or not
-	if firstAdmin.Email != "" {
+	if firstAdmin.Email == "" {
 		connection.Create(&newAdmin)
 	}
 	connection.Migrator().DropTable("GameScore", "GameUser")
