@@ -6,7 +6,6 @@ import (
 	"log"
 	"net/http"
 
-	"github.com/gorilla/mux"
 	"github.com/gorilla/websocket"
 )
 
@@ -308,30 +307,55 @@ func DeleteAccount(w http.ResponseWriter, r *http.Request) {
 	connection, _ := GetDatabase()
 	defer CloseDatabase(connection)
 
-	vars := mux.Vars(r)
-	userId := vars["userId"]
+	//vars := mux.Vars(r)
+	//userId := vars["userId"]
 
-	var dbUser User
-	connection.Where("id = ?", userId).First(&dbUser)
+	userId := r.URL.Query().Get("userId")
+	role := r.URL.Query().Get("role")
 
-	if dbUser.Name == "" {
-		var err Error
-		err = SetError(err, "Username does't exist")
-		w.Header().Set("Content-Type", "application/json")
-		json.NewEncoder(w).Encode(err)
-		return
+	if (role == "admin") {
+		var dbAdmin Admin
+		connection.Where("id = ?", userId).First(&dbAdmin)
+	
+		if dbAdmin.Email == "" {
+			var err Error
+			err = SetError(err, "Username does't exist")
+			w.Header().Set("Content-Type", "application/json")
+			json.NewEncoder(w).Encode(err)
+			return
+		}
+	
+		//can't delete self
+		if r.Header.Get("Email") == dbAdmin.Email {
+			var err Error
+			err = SetError(err, "User can't delete themselves")
+			w.Header().Set("Content-Type", "application/json")
+			json.NewEncoder(w).Encode(err)
+			return
+		}
+		connection.Delete(&dbAdmin)
+	} else {
+		var dbUser User
+		connection.Where("id = ?", userId).First(&dbUser)
+	
+		if dbUser.Name == "" {
+			var err Error
+			err = SetError(err, "Username does't exist")
+			w.Header().Set("Content-Type", "application/json")
+			json.NewEncoder(w).Encode(err)
+			return
+		}
+	
+		//can't delete self
+		if r.Header.Get("Name") == dbUser.Name {
+			var err Error
+			err = SetError(err, "User can't delete themselves")
+			w.Header().Set("Content-Type", "application/json")
+			json.NewEncoder(w).Encode(err)
+			return
+		}
+		connection.Delete(&dbUser)
 	}
-
-	//can't delete self
-	if r.Header.Get("Name") == dbUser.Name {
-		var err Error
-		err = SetError(err, "User can't delete themselves")
-		w.Header().Set("Content-Type", "application/json")
-		json.NewEncoder(w).Encode(err)
-		return
-	}
-
-	connection.Delete(&dbUser)
 }
 
 func Logout(w http.ResponseWriter, r *http.Request) {

@@ -7,7 +7,7 @@ async function signinUser() {
     if (!!username && !!password) {
         document.getElementById("sError1").style.visibility = "hidden";
         var authUser = await adminSignin(username, password);
-        if (authUser && authUser.role === "admin") {
+        if (authUser) {
             document.getElementById("sError2").style.visibility = "hidden";
             window.location.href = 'index.html';
         }

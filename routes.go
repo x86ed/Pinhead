@@ -45,9 +45,9 @@ func InitializeRoute() {
 	localRouter.HandleFunc("/update_score", IsAuthorizedAdmin(UpdateScore)).Methods("POST")
 
 	localRouter.HandleFunc("/signin", AdminSignIn).Methods("POST")
-	localRouter.HandleFunc("/admin", CreateAdmin).Methods("POST")
+	localRouter.HandleFunc("/admin", IsAuthorizedAdmin(CreateAdmin)).Methods("POST")
 	localRouter.HandleFunc("/admin", IsAuthorizedAdmin(CreateAdminAccount)).Methods("POST")
-	localRouter.HandleFunc("/admin/{userId}", IsAuthorizedAdmin(DeleteAccount)).Methods("DELETE")
+	localRouter.HandleFunc("/admin", IsAuthorizedAdmin(DeleteAccount)).Methods("DELETE")
 
 	localRouter.Methods("OPTIONS").HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Access-Control-Allow-Origin", "")

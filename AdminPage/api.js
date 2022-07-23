@@ -30,6 +30,7 @@ export async function adminSignin(name, password) {
         var authUser = JSON.parse(result);
         sessionStorage.setItem("userEmail", authUser.email);
         sessionStorage.setItem("jwtToken", authUser.token);
+        console.log("got authUser: ", authUser);
         return authUser;
     }
     catch (error) {
@@ -73,14 +74,16 @@ export async function getAdmins() {
     };
 }
 
-export const deleteUser = (userId) => {
+export const deleteUser = (userInfo) => {
     const requestOptions = {
         method: 'DELETE',
         headers: defaultHeaders(true),
         redirect: 'follow'
     };
   
-    fetch(baseUrl + "admin/" + userId, requestOptions)
+    const user = userInfo.split(":");
+
+    fetch(baseUrl + "admin" + "?userId=" + user[0] + "&role=" + user[1], requestOptions)
     .then(response => response.text())
     .then(result => console.log(result))
     .catch(error => console.log('error', error));

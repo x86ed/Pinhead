@@ -1,5 +1,5 @@
 import { getAdmins } from "./api.js";
-import { confirmDeleteUser } from "./admin.js";
+import { confirmDeleteAdminUser } from "./admin.js";
 
 const TABLE_SORT_DIRECTION = {
   NONE: 'none',
@@ -9,15 +9,10 @@ const TABLE_SORT_DIRECTION = {
  
 const columns = [
   {
-    id: 'name',
-    title: 'Name',
+    id: 'email',
+    title: 'Email',
     sortCycle: 'tri-states-from-ascending',
-  },
-  {
-    id: 'role',
-    title: 'Role',
-    sortCycle: 'tri-states-from-ascending',
-  },
+  }
 ];
 
 var rows;
@@ -25,20 +20,20 @@ var rows;
 // event listener for dynamic delete button created per row as needed
 document.querySelector('body').addEventListener('click', function (e) {
   var userId = null;
-  var userName = null;
-  if (e.target.classList.contains('confirmDeleteUserBtn')) {
+  var email = null;
+  if (e.target.classList.contains('confirmDeleteAdminUserBtn')) {
     var btn = e.target;
-    userName = btn.getAttribute('username');
+    email = btn.getAttribute('email');
     userId = btn.getAttribute('userId');
   }
-  if (e.target.parentNode.classList.contains('confirmDeleteUserBtn')) {
+  if (e.target.parentNode.classList.contains('confirmDeleteAdminUserBtn')) {
     var btn = e.target.parentNode;
-    userName = btn.getAttribute('username');
+    email = btn.getAttribute('email');
     userId = btn.getAttribute('userId');
   }
   
-  if (userName && userId) {
-    confirmDeleteUser(userName, userId);
+  if (email && userId) {
+    confirmDeleteAdminUser(email, userId);
   }
 });
 
@@ -127,7 +122,7 @@ export const table = () => {
               })
             .join('')}
           <bx-table-cell>
-            <button class="confirmDeleteUserBtn deleteBtn" username="${row.name}" userId="${row.id}">
+            <button class="confirmDeleteAdminUserBtn deleteBtn" email="${row.email}" userId="${row.id}">
               <i class="fa fa-trash"></i>
             </button>
           </bx-table-cell>
@@ -181,7 +176,7 @@ async function updateTree() {
       return {
         id: user.ID,
         name: user.name,
-        role: user.role
+        email: user.email
       }
     });
     tableReady.innerHTML = table();
