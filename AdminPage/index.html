@@ -35,8 +35,32 @@
     <bx-tab id="tab-userTable" target="panel-userTable" value="userTable">User Table</bx-tab>
   </bx-tabs>
   <div>
-    <div id="panel-home" role="tabpanel" aria-labelledby="tab-home" hidden>
-      <h4>Ace Pinball Palace Admin Controls Page</h4>
+    <div class="adminControlsTab" id="panel-home" role="tabpanel" aria-labelledby="tab-home" hidden>
+      <h4>Ace Pinball Palace Admin Controls</h4>
+      <div class="controls">
+        <div class="innerCtrl">
+          <p class="smlTxt">Close current game and create a new game</p>
+          <button class="btn" id="newGameBtn">
+            <i class="fa fa-gamepad" aria-hidden="true"></i>
+          </button>
+        </div>
+        <div class="updateScore">
+          <input id="updateScoreIn" type="number" placeholder="Current users score" value=""/>
+          <button class="btn" id="updateScoreBtn">
+            <i class="fa fa-angle-double-right" aria-hidden="true"></i>
+          </button>
+        </div>
+        <div class="innerCtrl">
+          <p class="smlTxt">End current users turn</p>
+          <button class="btn" id="nextTurnBtn">Next Turn</button>
+        </div>
+        <div>
+          <button class="btn" id="highScoreBtn">High Score</button>
+        </div>
+      </div>
+      <div>
+        <p>Current Players</p>
+      </div>
     </div>
     <div id="panel-adminTable" role="tabpanel" aria-labelledby="tab-adminTable" hidden>
       <div id="admins-table" class="table dds-theme-zone-g90"></div>

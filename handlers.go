@@ -114,6 +114,25 @@ func SignUp(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(players)
 }
 
+/*
+func GetListOfQueuedPlayers(connection *gorm.DB) ([]Player) {
+		// get list of users to return as queued players
+		var scores []Score
+		var users []User
+		var curGame Game
+
+		connection.Model(&curGame).Order("updated_at desc").Association("Users").Find(&users)
+		connection.Model(&curGame).Order("updated_at desc").Association("Scores").Find(&scores)
+		var players []Player
+	
+		for _, element := range users {
+			players = append(players, Player{Name: element.Name, Initials: element.Initials, Class: GetScoreState(scores, element.ID)})
+		}
+	
+		return players;
+}
+*/
+
 func HandleQueue() {
 	connection, _ := GetDatabase()
 	defer CloseDatabase(connection)

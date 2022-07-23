@@ -18,7 +18,6 @@ body, html {
     flex-direction: column;
     align-items: center;
     border: black;
-    align-self: center;
     border-style: solid;
     border-width: medium;
     width: fit-content;
@@ -46,4 +45,40 @@ body, html {
   .sError {
     color: darkred;
     visibility: collapse;
+  }
+
+  .adminControlsTab {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .controls {
+    display: flex;
+    flex-direction: column;
+    border: black;
+    border-style: solid;
+    border-width: medium;
+    padding: 10px;
+    margin: 20px;
+    width: fit-content;
+    align-self: center;
+  }
+
+  .innerCtrl {
+    display: flex;
+    margin: 5px;
+  }
+
+  .smlTxt {
+    font-size: x-small;
+    align-self: center;
+  }
+
+  .btn {
+    font-size: 10px;
+  }
+
+  .updateScore {
+    display: flex;
   }

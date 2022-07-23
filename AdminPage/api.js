@@ -88,3 +88,89 @@ export const deleteUser = (userInfo) => {
     .then(result => console.log(result))
     .catch(error => console.log('error', error));
 }
+
+export async function newGame() {
+    const requestOptions = {
+        method: 'POST',
+        headers: defaultHeaders(true),
+        redirect: 'follow'
+    };
+
+    try {
+        var response = await fetch(baseUrl + "new_game", requestOptions)
+        var result = await response.text();
+        var resultJson = JSON.parse(result);
+
+        console.log("newGame resultJson: ", resultJson);
+        return resultJson;
+    }
+    catch (error) {
+        console.log('error', error);
+    };
+}
+
+export async function nextTurn() {
+    const requestOptions = {
+        method: 'POST',
+        headers: defaultHeaders(true),
+        redirect: 'follow'
+    };
+
+    try {
+        var response = await fetch(baseUrl + "next_turn", requestOptions)
+        var result = await response.text();
+        var resultJson = JSON.parse(result);
+
+        console.log("nextTurn resultJson: ", resultJson);
+        return resultJson;
+    }
+    catch (error) {
+        console.log('error', error);
+    };
+}
+
+export async function highScore() {
+    const requestOptions = {
+        method: 'POST',
+        headers: defaultHeaders(true),
+        redirect: 'follow'
+    };
+
+    try {
+        var response = await fetch(baseUrl + "high_score", requestOptions)
+        var result = await response.text();
+        var resultJson = JSON.parse(result);
+
+        console.log("highScore resultJson: ", resultJson);
+        return resultJson;
+    }
+    catch (error) {
+        console.log('error', error);
+    };
+}
+
+export async function updateScore(userId, score) {
+    const raw = JSON.stringify({
+        "id": userId,
+        "score": score,
+    });
+
+    const requestOptions = {
+        method: 'POST',
+        headers: defaultHeaders(true),
+        body: raw,
+        redirect: 'follow'
+    };
+
+    try {
+        var response = await fetch(baseUrl + "update_score", requestOptions)
+        var result = await response.text();
+        var resultJson = JSON.parse(result);
+
+        console.log("UpdateScore resultJson: ", resultJson);
+        return resultJson;
+    }
+    catch (error) {
+        console.log('error', error);
+    };
+}
