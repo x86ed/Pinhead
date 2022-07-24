@@ -124,11 +124,11 @@ func GetListOfQueuedPlayers(connection *gorm.DB) ([]Player) {
 		connection.Model(&curGame).Order("updated_at desc").Association("Users").Find(&users)
 		connection.Model(&curGame).Order("updated_at desc").Association("Scores").Find(&scores)
 		var players []Player
-	
+
 		for _, element := range users {
 			players = append(players, Player{Name: element.Name, Initials: element.Initials, Class: GetScoreState(scores, element.ID)})
 		}
-	
+
 		return players;
 }
 */
@@ -332,10 +332,10 @@ func DeleteAccount(w http.ResponseWriter, r *http.Request) {
 	userId := r.URL.Query().Get("userId")
 	role := r.URL.Query().Get("role")
 
-	if (role == "admin") {
+	if role == "admin" {
 		var dbAdmin Admin
 		connection.Where("id = ?", userId).First(&dbAdmin)
-	
+
 		if dbAdmin.Email == "" {
 			var err Error
 			err = SetError(err, "Username does't exist")
@@ -343,7 +343,7 @@ func DeleteAccount(w http.ResponseWriter, r *http.Request) {
 			json.NewEncoder(w).Encode(err)
 			return
 		}
-	
+
 		//can't delete self
 		if r.Header.Get("Email") == dbAdmin.Email {
 			var err Error
@@ -356,7 +356,7 @@ func DeleteAccount(w http.ResponseWriter, r *http.Request) {
 	} else {
 		var dbUser User
 		connection.Where("id = ?", userId).First(&dbUser)
-	
+
 		if dbUser.Name == "" {
 			var err Error
 			err = SetError(err, "Username does't exist")
@@ -364,7 +364,7 @@ func DeleteAccount(w http.ResponseWriter, r *http.Request) {
 			json.NewEncoder(w).Encode(err)
 			return
 		}
-	
+
 		//can't delete self
 		if r.Header.Get("Name") == dbUser.Name {
 			var err Error
