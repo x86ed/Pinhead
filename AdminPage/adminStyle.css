@@ -1,0 +1,84 @@
+body, html {
+    width: 100vw;
+    height: 100vh;
+  }
+
+  .adminPageBody {
+    justify-content: center;
+    display: flex;
+    overflow-y: auto;
+    flex-direction: column;
+    justify-content: flex-start;
+    background-color: grey;
+  }
+  
+
+  .signin {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    border: black;
+    border-style: solid;
+    border-width: medium;
+    width: fit-content;
+    padding: 20px;
+  }
+
+  .signinInput {
+    outline: auto;
+    width: auto;
+  }
+
+  .signinBtn {
+    margin: 5px;
+    border-radius: 5px;
+  }
+
+  .table {
+    margin: 20px;
+  }
+
+  .paginationNoScroll {
+    overflow-y: hidden;
+  }
+
+  .sError {
+    color: darkred;
+    visibility: collapse;
+  }
+
+  .adminControlsTab {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .controls {
+    display: flex;
+    flex-direction: column;
+    border: black;
+    border-style: solid;
+    border-width: medium;
+    padding: 10px;
+    margin: 20px;
+    width: fit-content;
+    align-self: center;
+  }
+
+  .innerCtrl {
+    display: flex;
+    margin: 5px;
+  }
+
+  .smlTxt {
+    font-size: x-small;
+    align-self: center;
+  }
+
+  .btn {
+    font-size: 10px;
+  }
+
+  .updateScore {
+    display: flex;
+  }

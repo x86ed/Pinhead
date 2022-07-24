@@ -9,7 +9,7 @@ func TestGoDotEnvVariable(t *testing.T) {
 	if err != nil {
 		t.Error("JWTKEY not found")
 	}
-	if o != "secretkeyjwt" {
+	if o != "usersecretkeyjwt" {
 		t.Error("wrong value")
 	}
 	_, err = GoDotEnvVariable("FAKE")
@@ -43,8 +43,8 @@ func TestCheckPasswordHash(t *testing.T) {
 	}
 }
 
-func TestGenerateJWT(t *testing.T) {
-	s, err := GenerateJWT("test", "user")
+func TestGenerateUserJWT(t *testing.T) {
+	s, err := GenerateUserJWT("test", "user")
 	if err != nil {
 		t.Error("JWT failed")
 	}

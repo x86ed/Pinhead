@@ -49,8 +49,7 @@ func CheckPasswordHash(password, hash string) bool {
 }
 
 // Generate JWT token
-func GenerateJWT(name, role string) (string, error) {
-	var mySigningKey = []byte(secretkey)
+func GenerateUserJWT(name string, role string) (string, error) {
 	token := jwt.New(jwt.SigningMethodHS256)
 	claims := token.Claims.(jwt.MapClaims)
 	claims["authorized"] = true
@@ -58,7 +57,23 @@ func GenerateJWT(name, role string) (string, error) {
 	claims["role"] = role
 	claims["exp"] = time.Now().Add(time.Minute * 30).Unix()
 
-	tokenString, err := token.SignedString(mySigningKey)
+	tokenString, err := token.SignedString([]byte(userSecretKey))
+	if err != nil {
+		return "", err
+	}
+
+	return tokenString, nil
+}
+
+// Generate JWT token
+func GenerateAdminJWT(email string) (string, error) {
+	token := jwt.New(jwt.SigningMethodHS256)
+	claims := token.Claims.(jwt.MapClaims)
+	claims["authorized"] = true
+	claims["email"] = email
+	claims["exp"] = time.Now().Add(time.Minute * 30).Unix()
+
+	tokenString, err := token.SignedString([]byte(adminSecretKey))
 	if err != nil {
 		return "", err
 	}

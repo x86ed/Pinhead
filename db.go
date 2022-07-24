@@ -30,7 +30,7 @@ func GetDatabase() (*gorm.DB, error) {
 
 //create user table in userdb
 func InitialMigration() error {
-	allModels := []interface{}{&Score{}, &User{}, &Game{}}
+	allModels := []interface{}{&Score{}, &User{}, &Game{}, &Admin{}}
 	connection, err := GetDatabase()
 	if err != nil {
 		return err
@@ -40,6 +40,15 @@ func InitialMigration() error {
 	err = connection.AutoMigrate(allModels...)
 	if err != nil {
 		return err
+	}
+	pass, _ := GenerateHashPassword(adminPass)
+	newAdmin := Admin{Email: adminUser, Password: pass}
+	firstAdmin := Admin{}
+	connection.Where("email = ?", adminUser).First(&firstAdmin)
+
+	//check email is alredy registered or not
+	if firstAdmin.Email == "" {
+		connection.Create(&newAdmin)
 	}
 	connection.Migrator().DropTable("GameScore", "GameUser")
 	connection.Create(&Game{})

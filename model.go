@@ -30,6 +30,12 @@ type User struct {
 	Initials string `json:"initials" gorm:"type:varchar(3)"`
 }
 
+type Admin struct {
+	Base
+	Email    string `json:"email"`
+	Password string `json:"password"`
+}
+
 type Score struct {
 	Base
 	User     uuid.UUID `json:"user"`

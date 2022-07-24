@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Sign In Page</title>
+    <link href="adminStyle.css" rel="stylesheet">
+  </head>
+  <body class="adminPageBody">
+    <div class="signin">
+      <div>
+        <p>Admin sign in:</p>
+        <p id="sError1" class="sError">Username and Password are required</p>
+        <p id="sError2" class="sError">Username or Password does not exist</p>
+      </div>
+      <div>
+        <input class="signinInput" id="adminUsername" type="text" placeholder="Enter your name" value=""/>
+        <input class="signinInput" id="adminPassword" type="password" placeholder="*******" value=""/>
+      </div>
+      <div>
+        <button class="signinBtn" id="aModalSubmit">Goto Admin Page</button>
+      </div>
+      </div>
+    </div>
+    <script type="module" src="signin.js"></script>
+  </body>
+</html>

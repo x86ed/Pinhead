@@ -7,9 +7,19 @@ type Authentication struct {
 	Password string `json:"password"`
 }
 
+type AdminAuthentication struct {
+	Email     string `json:"email"`
+	Password string `json:"password"`
+}
+
 type Token struct {
 	Role        string `json:"role"`
 	Name        string `json:"name"`
+	TokenString string `json:"token"`
+}
+
+type AdminToken struct {
+	Email        string `json:"email"`
 	TokenString string `json:"token"`
 }
 

@@ -6,7 +6,6 @@ import (
 	"log"
 	"net/http"
 
-	"github.com/gorilla/mux"
 	"github.com/gorilla/websocket"
 )
 
@@ -115,12 +114,84 @@ func SignUp(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(players)
 }
 
+/*
+func GetListOfQueuedPlayers(connection *gorm.DB) ([]Player) {
+		// get list of users to return as queued players
+		var scores []Score
+		var users []User
+		var curGame Game
+
+		connection.Model(&curGame).Order("updated_at desc").Association("Users").Find(&users)
+		connection.Model(&curGame).Order("updated_at desc").Association("Scores").Find(&scores)
+		var players []Player
+
+		for _, element := range users {
+			players = append(players, Player{Name: element.Name, Initials: element.Initials, Class: GetScoreState(scores, element.ID)})
+		}
+
+		return players;
+}
+*/
+
 func HandleQueue() {
 	connection, _ := GetDatabase()
 	defer CloseDatabase(connection)
 }
 
-func SignIn(w http.ResponseWriter, r *http.Request) {
+func AdminSignIn(w http.ResponseWriter, r *http.Request) {
+	connection, _ := GetDatabase()
+	defer CloseDatabase(connection)
+
+	var authDetails AdminAuthentication
+
+	err := json.NewDecoder(r.Body).Decode(&authDetails)
+	if err != nil {
+		var err Error
+		err = SetError(err, "Error in reading payload.")
+		w.Header().Set("Content-Type", "application/json")
+		json.NewEncoder(w).Encode(err)
+		return
+	}
+
+	var authUser Admin
+	connection.Where("email = 	?", authDetails.Email).First(&authUser)
+
+	if authUser.Email == "" {
+		var err Error
+		err = SetError(err, "Username or Password is incorrect")
+		w.Header().Set("Content-Type", "application/json")
+		json.NewEncoder(w).Encode(err)
+		return
+	}
+
+	check := CheckPasswordHash(authDetails.Password, authUser.Password)
+
+	if !check {
+		var err Error
+		err = SetError(err, "Username or Password is incorrect")
+		w.Header().Set("Content-Type", "application/json")
+		json.NewEncoder(w).Encode(err)
+		return
+	}
+
+	validToken, err := GenerateAdminJWT(authUser.Email)
+	if err != nil {
+		var err Error
+		err = SetError(err, "Failed to generate token")
+		w.Header().Set("Content-Type", "application/json")
+		json.NewEncoder(w).Encode(err)
+		return
+	}
+
+	var token AdminToken
+	token.Email = authUser.Email
+	token.TokenString = validToken
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(token)
+}
+
+//signin in the same action for users and admins but with different secretkey credentials
+func UserSignIn(w http.ResponseWriter, r *http.Request) {
 	connection, _ := GetDatabase()
 	defer CloseDatabase(connection)
 
@@ -156,7 +227,7 @@ func SignIn(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	validToken, err := GenerateJWT(authUser.Name, authUser.Role)
+	validToken, err := GenerateUserJWT(authUser.Name, authUser.Role)
 	if err != nil {
 		var err Error
 		err = SetError(err, "Failed to generate token")
@@ -205,14 +276,45 @@ func ListUsers(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(users)
 }
 
+func ListAdmins(w http.ResponseWriter, r *http.Request) {
+	var admins []Admin
+
+	connection, _ := GetDatabase()
+	defer CloseDatabase(connection)
+
+	result := connection.Find(&admins)
+
+	if result.Error != nil {
+		var err Error
+		err = SetError(err, "Failed to get users from the db")
+		w.Header().Set("Content-Type", "application/json")
+		json.NewEncoder(w).Encode(err)
+		return
+	}
+
+	for _, admin := range admins {
+		admin.MarshalJSON()
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(admins)
+}
+
+func (a Admin) MarshalJSON() ([]byte, error) {
+	// prevent recursion
+	type admin Admin
+	x := admin(a)
+	// remove users password so it is not returned to the caller
+	x.Password = ""
+	return json.Marshal(x)
+}
+
 func (u User) MarshalJSON() ([]byte, error) {
 	// prevent recursion
 	type user User
 	x := user(u)
 	// remove users password so it is not returned to the caller
 	x.Password = ""
-	// returning the initials basically is the same as returning the password
-	x.Initials = ""
 	return json.Marshal(x)
 }
 
@@ -224,30 +326,55 @@ func DeleteAccount(w http.ResponseWriter, r *http.Request) {
 	connection, _ := GetDatabase()
 	defer CloseDatabase(connection)
 
-	vars := mux.Vars(r)
-	userId := vars["userId"]
+	//vars := mux.Vars(r)
+	//userId := vars["userId"]
 
-	var dbUser User
-	connection.Where("id = ?", userId).First(&dbUser)
+	userId := r.URL.Query().Get("userId")
+	role := r.URL.Query().Get("role")
 
-	if dbUser.Name == "" {
-		var err Error
-		err = SetError(err, "Username does't exist")
-		w.Header().Set("Content-Type", "application/json")
-		json.NewEncoder(w).Encode(err)
-		return
+	if role == "admin" {
+		var dbAdmin Admin
+		connection.Where("id = ?", userId).First(&dbAdmin)
+
+		if dbAdmin.Email == "" {
+			var err Error
+			err = SetError(err, "Username does't exist")
+			w.Header().Set("Content-Type", "application/json")
+			json.NewEncoder(w).Encode(err)
+			return
+		}
+
+		//can't delete self
+		if r.Header.Get("Email") == dbAdmin.Email {
+			var err Error
+			err = SetError(err, "User can't delete themselves")
+			w.Header().Set("Content-Type", "application/json")
+			json.NewEncoder(w).Encode(err)
+			return
+		}
+		connection.Delete(&dbAdmin)
+	} else {
+		var dbUser User
+		connection.Where("id = ?", userId).First(&dbUser)
+
+		if dbUser.Name == "" {
+			var err Error
+			err = SetError(err, "Username does't exist")
+			w.Header().Set("Content-Type", "application/json")
+			json.NewEncoder(w).Encode(err)
+			return
+		}
+
+		//can't delete self
+		if r.Header.Get("Name") == dbUser.Name {
+			var err Error
+			err = SetError(err, "User can't delete themselves")
+			w.Header().Set("Content-Type", "application/json")
+			json.NewEncoder(w).Encode(err)
+			return
+		}
+		connection.Delete(&dbUser)
 	}
-
-	//can't delete self
-	if r.Header.Get("Name") == dbUser.Name {
-		var err Error
-		err = SetError(err, "User can't delete themselves")
-		w.Header().Set("Content-Type", "application/json")
-		json.NewEncoder(w).Encode(err)
-		return
-	}
-
-	connection.Delete(&dbUser)
 }
 
 func Logout(w http.ResponseWriter, r *http.Request) {
