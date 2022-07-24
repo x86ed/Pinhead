@@ -1,4 +1,4 @@
-const baseUrl = "http://localhost:54321/";
+const baseUrl = `http://${window.location.host}`;
 
 const defaultHeaders = (includeAuth) => {
     const myHeaders = new Headers();
