@@ -10,12 +10,13 @@ import (
 //--------GLOBAL VARIABLES---------------
 
 var (
-	router       *mux.Router
-	localRouter  *mux.Router
-	userSecretKey, _ = GoDotEnvVariable("JWTKEY")
+	router            *mux.Router
+	localRouter       *mux.Router
+	userSecretKey, _  = GoDotEnvVariable("JWTKEY")
 	adminSecretKey, _ = GoDotEnvVariable("ADMINJWTKEY")
-	adminUser, _ = GoDotEnvVariable("ADMINEMAIL")
-	adminPass, _ = GoDotEnvVariable("ADMINPASS")
+	adminUser, _      = GoDotEnvVariable("ADMINEMAIL")
+	adminPass, _      = GoDotEnvVariable("ADMINPASS")
+	activeUser        string
 )
 
 func main() {

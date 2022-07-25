@@ -90,59 +90,14 @@ let output = document.getElementById("output");
 let input = document.getElementById("input");
 let ws;
 
-const sendS = () =>{
-    if (!ws) {
+const wsSend = (val) =>{
+    if (!ws || !val.length){
         return false;
     }
-    console.log("SEND: S");
-    ws.send("S");
+    console.log(`SEND: ${val}`);
+    ws.send(val);
     return false;
-};
-
-const sendL = ()=> {
-    if (!ws) {
-        return false;
-    }
-    console.log("SEND: L");
-    ws.send("L");
-    return false;
-};
-
-const sendLU = () => {
-    if (!ws) {
-        return false;
-    }
-    console.log("SEND: LU");
-    ws.send("LU");
-    return false;
-};
-
-const sendLD = () =>{
-    if (!ws) {
-        return false;
-    }
-    console.log("SEND: LD");
-    ws.send("LD");
-    return false;
-};
-
-const sendRU = () =>{
-    if (!ws) {
-        return false;
-    }
-    console.log("SEND: RU");
-    ws.send("RU");
-    return false;
-};
-
-const sendRD = ()=>{
-    if (!ws) {
-        return false;
-    }
-    console.log("SEND: RD");
-    ws.send("RD");
-    return false;
-};
+}
 
 document.querySelector("body").onload = (evt) => {
     if (ws) {
@@ -163,17 +118,47 @@ document.querySelector("body").onload = (evt) => {
         console.log("ERROR: " + evt.data);
     }
 
-    document.getElementById("startbutton").onclick = sendS;
-    
-    document.getElementById("launchbutton").onclick = sendL;
-    
-    document.getElementById("leftbutton").onmousedown = sendLU;
+    const ButtonCommands = [
+        {dom_id:"startbutton",keys:["Enter"],downCommand:"S",upCommand:""},
+        {dom_id:"launchbutton",keys:[" "],downCommand:"L",upCommand:""},
+        {dom_id:"leftbutton",keys:["l","z"],downCommand:"LD",upCommand:"LU"},
+        {dom_id:"rightbutton",keys:["r","z"],downCommand:"RD",upCommand:"RU"},
+    ];
 
-    document.getElementById("rightbutton").onmousedown = sendRU;
-    
-    document.getElementById("leftbutton").onmouseup = sendLD;
-    
-    document.getElementById("rightbutton").onmouseup = sendRD;
+    ButtonCommands.map((com)=>{
+        if (com.dom_id.length){
+            if (com.downCommand.length){
+                if (!com.upCommand.length){
+                    document.getElementById(com.dom_id).onclick = () => {wsSend(com.downCommand)};
+                }else{
+                    document.getElementById(com.dom_id).onmousedown = () => {wsSend(com.downCommand)};
+                }
+            }
+            if (com.upCommand.length){
+                document.getElementById(com.dom_id).onmouseup = ()=> {wsSend(com.upCommand)};
+            }
+        }
+    })
+
+
+
+    document.onkeydown = function (e) {
+        e = e || window.event;
+        ButtonCommands.forEach((com)=>{
+            if(com.keys.indexOf(e.key)>-1){
+                wsSend(com.downCommand);
+            }
+        });
+    };
+
+    document.onkeyup = function (e) {
+        e = e || window.event;
+        ButtonCommands.forEach((com)=>{
+            if(com.keys.indexOf(e.key)>-1){
+                wsSend(com.upCommand);
+            }
+        });
+    };
 
     // Sign Up
     document.getElementById("signup-button").addEventListener("click", handleSignUp);
