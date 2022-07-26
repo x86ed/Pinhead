@@ -276,6 +276,28 @@ func ListUsers(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(users)
 }
 
+func ListControls(w http.ResponseWriter, r *http.Request) {
+	var controls []Control
+	connection, _ := GetDatabase()
+	defer CloseDatabase(connection)
+
+	result := connection.Find(&controls)
+	if result.Error != nil {
+		var err Error
+		err = SetError(err, "Failed to get controls from the db")
+		w.Header().Set("Content-Type", "application/json")
+		json.NewEncoder(w).Encode(err)
+		return
+	}
+
+	// for _, control := range controls {
+	// 	control.MarshalJSON()
+	// }
+
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(controls)
+}
+
 func ListAdmins(w http.ResponseWriter, r *http.Request) {
 	var admins []Admin
 

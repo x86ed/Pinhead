@@ -54,7 +54,7 @@ const signin = (name,initials)=>{
         redirect: 'follow'
     };
 
-    fetch("http://localhost:8080/signin", requestOptions)
+    fetch("/signin", requestOptions)
     .then(response => response.text())
     .then(result => console.log(result))
     .catch(error => console.log('error', error));
@@ -69,7 +69,7 @@ const requestOptions = {
   redirect: 'follow'
 };
 
-fetch("http://localhost:8080/user", requestOptions)
+fetch("/user", requestOptions)
   .then(response => response.text())
   .then(result => console.log(result))
   .catch(error => console.log('error', error));
@@ -90,59 +90,14 @@ let output = document.getElementById("output");
 let input = document.getElementById("input");
 let ws;
 
-const sendS = () =>{
-    if (!ws) {
+const wsSend = (val) =>{
+    if (!ws || !val.length){
         return false;
     }
-    console.log("SEND: S");
-    ws.send("S");
+    console.log(`SEND: ${val}`);
+    ws.send(val);
     return false;
-};
-
-const sendL = ()=> {
-    if (!ws) {
-        return false;
-    }
-    console.log("SEND: L");
-    ws.send("L");
-    return false;
-};
-
-const sendLU = () => {
-    if (!ws) {
-        return false;
-    }
-    console.log("SEND: LU");
-    ws.send("LU");
-    return false;
-};
-
-const sendLD = () =>{
-    if (!ws) {
-        return false;
-    }
-    console.log("SEND: LD");
-    ws.send("LD");
-    return false;
-};
-
-const sendRU = () =>{
-    if (!ws) {
-        return false;
-    }
-    console.log("SEND: RU");
-    ws.send("RU");
-    return false;
-};
-
-const sendRD = ()=>{
-    if (!ws) {
-        return false;
-    }
-    console.log("SEND: RD");
-    ws.send("RD");
-    return false;
-};
+}
 
 document.querySelector("body").onload = (evt) => {
     if (ws) {
@@ -163,17 +118,46 @@ document.querySelector("body").onload = (evt) => {
         console.log("ERROR: " + evt.data);
     }
 
-    document.getElementById("startbutton").onclick = sendS;
-    
-    document.getElementById("launchbutton").onclick = sendL;
-    
-    document.getElementById("leftbutton").onmousedown = sendLU;
+    fetch("/controls", )
+    .then(response => response.json())
+    .then(result => bindHandlers(result))
+    .catch(error => console.log('error', error));
 
-    document.getElementById("rightbutton").onmousedown = sendRU;
-    
-    document.getElementById("leftbutton").onmouseup = sendLD;
-    
-    document.getElementById("rightbutton").onmouseup = sendRD;
+    const bindHandlers = (ButtonCommands)=>{
+        ButtonCommands.map((com)=>{
+            if (com.dom_id.length){
+                if (com.down_command.length){
+                    if (!com.up_command.length){
+                        document.getElementById(com.dom_id).onclick = () => {wsSend(com.down_command)};
+                    }else{
+                        document.getElementById(com.dom_id).onmousedown = () => {wsSend(com.down_command)};
+                    }
+                }
+                if (com.up_command.length){
+                    document.getElementById(com.dom_id).onmouseup = ()=> {wsSend(com.up_command)};
+                }
+            }
+        });
+
+
+        document.onkeydown = function (e) {
+            e = e || window.event;
+            ButtonCommands.forEach((com)=>{
+                if(com.keys.indexOf(e.key)>-1){
+                    wsSend(com.down_command);
+                }
+            });
+        };
+
+        document.onkeyup = function (e) {
+            e = e || window.event;
+            ButtonCommands.forEach((com)=>{
+                if(com.keys.indexOf(e.key)>-1){
+                    wsSend(com.up_command);
+                }
+            });
+        };
+    }
 
     // Sign Up
     document.getElementById("signup-button").addEventListener("click", handleSignUp);

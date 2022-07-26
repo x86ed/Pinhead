@@ -4,7 +4,11 @@ go 1.17
 
 require github.com/gorilla/handlers v1.5.1
 
-require golang.org/x/sys v0.0.0-20210615035016-665e8c7367d1 // indirect
+require (
+	github.com/go-sql-driver/mysql v1.6.0 // indirect
+	golang.org/x/sys v0.0.0-20210615035016-665e8c7367d1 // indirect
+	gorm.io/driver/mysql v1.3.2 // indirect
+)
 
 require (
 	github.com/felixge/httpsnoop v1.0.1 // indirect
@@ -20,6 +24,7 @@ require (
 	github.com/satori/go.uuid v1.2.0
 	github.com/warthog618/gpiod v0.8.0
 	golang.org/x/crypto v0.0.0-20220525230936-793ad666bf5e // indirect
+	gorm.io/datatypes v1.0.7
 	gorm.io/driver/sqlite v1.3.4 // indirect
 	gorm.io/gorm v1.23.6 // indirect
 )

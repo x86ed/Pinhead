@@ -26,6 +26,7 @@ func InitializeRoute() {
 	router.HandleFunc("/signin", UserSignIn).Methods("POST")
 
 	router.HandleFunc("/user", IsAuthorizedUser(UserIndex)).Methods("GET")
+	router.HandleFunc("/controls", ListControls).Methods("GET")
 
 	router.HandleFunc("/buttonpress", echo).Methods("GET")
 	router.HandleFunc("/logout", IsAuthorizedUser(Logout)).Methods("POST")
