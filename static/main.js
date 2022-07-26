@@ -140,7 +140,7 @@ document.querySelector("body").onload = (evt) => {
         });
 
 
-        document.onkeydown = function (e) {
+        document.onkeyup = function (e) {
             e = e || window.event;
             ButtonCommands.forEach((com)=>{
                 if(com.keys.indexOf(e.key)>-1){
@@ -149,7 +149,7 @@ document.querySelector("body").onload = (evt) => {
             });
         };
 
-        document.onkeyup = function (e) {
+        document.onkeydown = function (e) {
             e = e || window.event;
             ButtonCommands.forEach((com)=>{
                 if(com.keys.indexOf(e.key)>-1){
