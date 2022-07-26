@@ -30,7 +30,7 @@ func GetDatabase() (*gorm.DB, error) {
 
 //create user table in userdb
 func InitialMigration() error {
-	allModels := []interface{}{&Score{}, &User{}, &Game{}, &Admin{}}
+	allModels := []interface{}{&Score{}, &User{}, &Game{}, &Admin{}, &Control{}}
 	connection, err := GetDatabase()
 	if err != nil {
 		return err
@@ -40,6 +40,16 @@ func InitialMigration() error {
 	err = connection.AutoMigrate(allModels...)
 	if err != nil {
 		return err
+	}
+	var controlCount int64
+	controls := []Control{
+		{DomID: "startbutton", Keys: []byte(`["Enter"]`), DownCommand: "S", UpCommand: ""},
+		{DomID: "launchbutton", Keys: []byte(`[" "]`), DownCommand: "L", UpCommand: ""},
+		{DomID: "leftbutton", Keys: []byte(`["l", "z"]`), DownCommand: "LD", UpCommand: "LU"},
+		{DomID: "rightbutton", Keys: []byte(`["r", "/"]`), DownCommand: "RD", UpCommand: "RU"}}
+	connection.Model(&Control{}).Count(&controlCount)
+	if controlCount < 1 {
+		connection.Create(controls)
 	}
 	pass, _ := GenerateHashPassword(adminPass)
 	newAdmin := Admin{Email: adminUser, Password: pass}

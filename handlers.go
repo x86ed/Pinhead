@@ -26,21 +26,21 @@ func echo(w http.ResponseWriter, r *http.Request) {
 			log.Println("read:", err)
 			break
 		}
-		// sw := string(message)
-		// switch sw {
-		// case "LU":
-		// 	Left(false)
-		// case "RU":
-		// 	Right(false)
-		// case "LD":
-		// 	Left(true)
-		// case "RD":
-		// 	Right(true)
-		// case "L":
-		// 	Launch()
-		// case "S":
-		// 	Start()
-		// }
+		sw := string(message)
+		switch sw {
+		case "LU":
+			Left(false)
+		case "RU":
+			Right(false)
+		case "LD":
+			Left(true)
+		case "RD":
+			Right(true)
+		case "L":
+			Launch()
+		case "S":
+			Start()
+		}
 
 		log.Printf("recv: %s", message)
 		err = c.WriteMessage(mt, message)
@@ -274,6 +274,28 @@ func ListUsers(w http.ResponseWriter, r *http.Request) {
 
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(users)
+}
+
+func ListControls(w http.ResponseWriter, r *http.Request) {
+	var controls []Control
+	connection, _ := GetDatabase()
+	defer CloseDatabase(connection)
+
+	result := connection.Find(&controls)
+	if result.Error != nil {
+		var err Error
+		err = SetError(err, "Failed to get controls from the db")
+		w.Header().Set("Content-Type", "application/json")
+		json.NewEncoder(w).Encode(err)
+		return
+	}
+
+	// for _, control := range controls {
+	// 	control.MarshalJSON()
+	// }
+
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(controls)
 }
 
 func ListAdmins(w http.ResponseWriter, r *http.Request) {

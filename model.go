@@ -4,14 +4,15 @@ import (
 	"time"
 
 	uuid "github.com/satori/go.uuid"
+	"gorm.io/datatypes"
 	"gorm.io/gorm"
 )
 
 type Base struct {
-	ID        uuid.UUID `gorm:"type:uuid;primary_key;"`
-	CreatedAt time.Time
-	UpdatedAt time.Time
-	DeletedAt *time.Time `sql:"index"`
+	ID        uuid.UUID  `json:"id" gorm:"type:uuid;primary_key;"`
+	CreatedAt time.Time  `json:"created_at"`
+	UpdatedAt time.Time  `json:"updated_at"`
+	DeletedAt *time.Time `json:"deleted_at" sql:"index"`
 }
 
 // BeforeCreate will set a UUID rather than numeric ID.
@@ -49,4 +50,12 @@ type Game struct {
 	Scores   []Score `json:"scores" gorm:"many2many:GameScore"`
 	InActive bool    `json:"in_active"`
 	Users    []User  `json:"users" gorm:"many2many:GameUser"`
+}
+
+type Control struct {
+	Base
+	DomID       string         `json:"dom_id"`
+	Keys        datatypes.JSON `json:"keys"`
+	DownCommand string         `json:"down_command"`
+	UpCommand   string         `json:"up_command"`
 }

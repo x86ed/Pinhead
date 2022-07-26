@@ -54,7 +54,7 @@ const signin = (name,initials)=>{
         redirect: 'follow'
     };
 
-    fetch("http://localhost:8080/signin", requestOptions)
+    fetch("/signin", requestOptions)
     .then(response => response.text())
     .then(result => console.log(result))
     .catch(error => console.log('error', error));
@@ -69,7 +69,7 @@ const requestOptions = {
   redirect: 'follow'
 };
 
-fetch("http://localhost:8080/user", requestOptions)
+fetch("/user", requestOptions)
   .then(response => response.text())
   .then(result => console.log(result))
   .catch(error => console.log('error', error));
@@ -118,47 +118,46 @@ document.querySelector("body").onload = (evt) => {
         console.log("ERROR: " + evt.data);
     }
 
-    const ButtonCommands = [
-        {dom_id:"startbutton",keys:["Enter"],downCommand:"S",upCommand:""},
-        {dom_id:"launchbutton",keys:[" "],downCommand:"L",upCommand:""},
-        {dom_id:"leftbutton",keys:["l","z"],downCommand:"LD",upCommand:"LU"},
-        {dom_id:"rightbutton",keys:["r","z"],downCommand:"RD",upCommand:"RU"},
-    ];
+    fetch("/controls", )
+    .then(response => response.json())
+    .then(result => bindHandlers(result))
+    .catch(error => console.log('error', error));
 
-    ButtonCommands.map((com)=>{
-        if (com.dom_id.length){
-            if (com.downCommand.length){
-                if (!com.upCommand.length){
-                    document.getElementById(com.dom_id).onclick = () => {wsSend(com.downCommand)};
-                }else{
-                    document.getElementById(com.dom_id).onmousedown = () => {wsSend(com.downCommand)};
+    const bindHandlers = (ButtonCommands)=>{
+        ButtonCommands.map((com)=>{
+            if (com.dom_id.length){
+                if (com.down_command.length){
+                    if (!com.up_command.length){
+                        document.getElementById(com.dom_id).onclick = () => {wsSend(com.down_command)};
+                    }else{
+                        document.getElementById(com.dom_id).onmousedown = () => {wsSend(com.down_command)};
+                    }
+                }
+                if (com.up_command.length){
+                    document.getElementById(com.dom_id).onmouseup = ()=> {wsSend(com.up_command)};
                 }
             }
-            if (com.upCommand.length){
-                document.getElementById(com.dom_id).onmouseup = ()=> {wsSend(com.upCommand)};
-            }
-        }
-    })
-
-
-
-    document.onkeydown = function (e) {
-        e = e || window.event;
-        ButtonCommands.forEach((com)=>{
-            if(com.keys.indexOf(e.key)>-1){
-                wsSend(com.downCommand);
-            }
         });
-    };
 
-    document.onkeyup = function (e) {
-        e = e || window.event;
-        ButtonCommands.forEach((com)=>{
-            if(com.keys.indexOf(e.key)>-1){
-                wsSend(com.upCommand);
-            }
-        });
-    };
+
+        document.onkeydown = function (e) {
+            e = e || window.event;
+            ButtonCommands.forEach((com)=>{
+                if(com.keys.indexOf(e.key)>-1){
+                    wsSend(com.down_command);
+                }
+            });
+        };
+
+        document.onkeyup = function (e) {
+            e = e || window.event;
+            ButtonCommands.forEach((com)=>{
+                if(com.keys.indexOf(e.key)>-1){
+                    wsSend(com.up_command);
+                }
+            });
+        };
+    }
 
     // Sign Up
     document.getElementById("signup-button").addEventListener("click", handleSignUp);
