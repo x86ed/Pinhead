@@ -25,8 +25,8 @@ func InitializeRoute() {
 	router.HandleFunc("/signup", PostSignUp).Methods("POST")
 	router.HandleFunc("/signin", PostSignIn).Methods("POST")
 
-	//router.HandleFunc("/user", IsAuthorizedUser(GetUserIndex)).Methods("GET")
 	router.HandleFunc("/controls", GetListControls).Methods("GET")
+	router.HandleFunc("/game", IsAuthorizedUser(GetCurrentGame)).Methods("GET")
 
 	// Websocket route
 	router.HandleFunc("/buttonpress", SocketButton).Methods("GET")

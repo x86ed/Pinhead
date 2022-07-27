@@ -98,6 +98,7 @@ func PostSignUp(w http.ResponseWriter, r *http.Request) {
 	connection.Where("name = ?", user.Name).First(&dbuser)
 	connection.Model(&curGame).Where("in_active = ?", false).Association("Users").Append(&user)
 	connection.Model(&curGame).Where("in_active = ?", false).Association("Scores").Append(&Score{User: user.ID})
+	activeUser = user.ID.String()
 	w.Header().Set("Content-Type", "application/json")
 	// json.NewEncoder(w).Encode(user)
 
@@ -110,8 +111,35 @@ func PostSignUp(w http.ResponseWriter, r *http.Request) {
 	for _, element := range users {
 		players = append(players, Player{Name: element.Name, Initials: element.Initials, Class: GetScoreState(scores, element.ID)})
 	}
+	game := CurGame{players, activeUser}
 
-	json.NewEncoder(w).Encode(players)
+	json.NewEncoder(w).Encode(game)
+}
+
+func GetCurrentGame(w http.ResponseWriter, r *http.Request) {
+	connection, _ := GetDatabase()
+	defer CloseDatabase(connection)
+
+	var curGame Game
+	var scores []Score
+
+	// insert user details in database
+	connection.Model(&curGame).Where("in_active = ?", false).First(&curGame)
+	w.Header().Set("Content-Type", "application/json")
+	// json.NewEncoder(w).Encode(user)
+
+	// get list of users to return as queued players
+	var users []User
+	connection.Model(&curGame).Order("updated_at desc").Association("Users").Find(&users)
+	connection.Model(&curGame).Order("updated_at desc").Association("Scores").Find(&scores)
+	var players []Player
+
+	for _, element := range users {
+		players = append(players, Player{Name: element.Name, Initials: element.Initials, Class: GetScoreState(scores, element.ID)})
+	}
+	game := CurGame{players, activeUser}
+
+	json.NewEncoder(w).Encode(game)
 }
 
 /*

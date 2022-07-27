@@ -17,19 +17,21 @@ const signup = (name,initials) =>{
     };
     
     fetch("/signup", requestOptions)
-        .then(response => response.text())
+        .then(response => response.json())
         .then(result => updateList(result))
         .catch(error => console.log('error', error));
 }
 
+let curID = '';
+
 const updateList = (result) => {
-    
-    let queueList = document.getElementById('queue-list');
+    curID = result.cur_id;
+    const queueList = document.getElementById('queue-list');
     
     let arr = [];
-    for (const element of JSON.parse(result)) {
+    for (const element of result.players) {
         let listItem = document.createElement('li');
-        listItem.textContent = `${element.Name} - ${element.Initials}`;
+        listItem.textContent = `${element.name} - ${element.initials}`;
         arr.push(listItem);
     }
     
