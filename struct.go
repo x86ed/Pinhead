@@ -35,12 +35,13 @@ const (
 )
 
 type Player struct {
+	ID       uuid.UUID
 	Name     string
 	Initials string
 	Class    string
 }
 
 type ScoreUpdate struct {
-	ID    uuid.UUID
-	Score int
+	ID    uuid.UUID `gorm:"type:uuid;primary_key;"`
+	Score int `json:"score"`
 }

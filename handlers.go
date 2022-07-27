@@ -108,30 +108,11 @@ func SignUp(w http.ResponseWriter, r *http.Request) {
 	var players []Player
 
 	for _, element := range users {
-		players = append(players, Player{Name: element.Name, Initials: element.Initials, Class: GetScoreState(scores, element.ID)})
+		players = append(players, Player{ID: element.ID, Name: element.Name, Initials: element.Initials, Class: GetScoreState(scores, element.ID)})
 	}
 
 	json.NewEncoder(w).Encode(players)
 }
-
-/*
-func GetListOfQueuedPlayers(connection *gorm.DB) ([]Player) {
-		// get list of users to return as queued players
-		var scores []Score
-		var users []User
-		var curGame Game
-
-		connection.Model(&curGame).Order("updated_at desc").Association("Users").Find(&users)
-		connection.Model(&curGame).Order("updated_at desc").Association("Scores").Find(&scores)
-		var players []Player
-
-		for _, element := range users {
-			players = append(players, Player{Name: element.Name, Initials: element.Initials, Class: GetScoreState(scores, element.ID)})
-		}
-
-		return players;
-}
-*/
 
 func HandleQueue() {
 	connection, _ := GetDatabase()
@@ -320,6 +301,34 @@ func ListAdmins(w http.ResponseWriter, r *http.Request) {
 
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(admins)
+}
+
+func ListActivePlayers(w http.ResponseWriter, r *http.Request) {
+	connection, _ := GetDatabase()
+	defer CloseDatabase(connection)
+
+	// get list of users to return as queued players
+	var scores []Score
+	var users []User
+	var curGame Game
+
+	connection.Model(&curGame).Where("in_active = ?", false).First(&curGame)
+
+	connection.Model(&curGame).Order("updated_at desc").Association("Users").Find(&users)
+	connection.Model(&curGame).Order("updated_at desc").Association("Scores").Find(&scores)
+	var players []Player
+	
+	for _, element := range users {
+		players = append(players, Player{ID: element.ID, Name: element.Name, Initials: element.Initials, Class: GetScoreState(scores, element.ID)})
+	}
+	
+	//playerlist is in reverse order => 
+	for i, j := 0, len(players)-1; i < j; i, j = i+1, j-1 {
+        players[i], players[j] = players[j], players[i]
+    }
+
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(players)
 }
 
 func (a Admin) MarshalJSON() ([]byte, error) {
