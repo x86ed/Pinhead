@@ -13,7 +13,7 @@ var addr = flag.String("addr", "localhost:8080", "http service address")
 
 var upgrader = websocket.Upgrader{} // use default options
 
-func echo(w http.ResponseWriter, r *http.Request) {
+func SocketButton(w http.ResponseWriter, r *http.Request) {
 	c, err := upgrader.Upgrade(w, r, nil)
 	if err != nil {
 		log.Print("upgrade:", err)
@@ -51,7 +51,7 @@ func echo(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func SignUp(w http.ResponseWriter, r *http.Request) {
+func PostSignUp(w http.ResponseWriter, r *http.Request) {
 	connection, _ := GetDatabase()
 	defer CloseDatabase(connection)
 
@@ -138,60 +138,8 @@ func HandleQueue() {
 	defer CloseDatabase(connection)
 }
 
-func AdminSignIn(w http.ResponseWriter, r *http.Request) {
-	connection, _ := GetDatabase()
-	defer CloseDatabase(connection)
-
-	var authDetails AdminAuthentication
-
-	err := json.NewDecoder(r.Body).Decode(&authDetails)
-	if err != nil {
-		var err Error
-		err = SetError(err, "Error in reading payload.")
-		w.Header().Set("Content-Type", "application/json")
-		json.NewEncoder(w).Encode(err)
-		return
-	}
-
-	var authUser Admin
-	connection.Where("email = 	?", authDetails.Email).First(&authUser)
-
-	if authUser.Email == "" {
-		var err Error
-		err = SetError(err, "Username or Password is incorrect")
-		w.Header().Set("Content-Type", "application/json")
-		json.NewEncoder(w).Encode(err)
-		return
-	}
-
-	check := CheckPasswordHash(authDetails.Password, authUser.Password)
-
-	if !check {
-		var err Error
-		err = SetError(err, "Username or Password is incorrect")
-		w.Header().Set("Content-Type", "application/json")
-		json.NewEncoder(w).Encode(err)
-		return
-	}
-
-	validToken, err := GenerateAdminJWT(authUser.Email)
-	if err != nil {
-		var err Error
-		err = SetError(err, "Failed to generate token")
-		w.Header().Set("Content-Type", "application/json")
-		json.NewEncoder(w).Encode(err)
-		return
-	}
-
-	var token AdminToken
-	token.Email = authUser.Email
-	token.TokenString = validToken
-	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(token)
-}
-
 //signin in the same action for users and admins but with different secretkey credentials
-func UserSignIn(w http.ResponseWriter, r *http.Request) {
+func PostSignIn(w http.ResponseWriter, r *http.Request) {
 	connection, _ := GetDatabase()
 	defer CloseDatabase(connection)
 
@@ -244,39 +192,7 @@ func UserSignIn(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(token)
 }
 
-func UserIndex(w http.ResponseWriter, r *http.Request) {
-	if r.Header.Get("Role") != "user" {
-		w.Write([]byte("Not Authorized."))
-		return
-	}
-	w.Write([]byte("Welcome, User."))
-}
-
-func ListUsers(w http.ResponseWriter, r *http.Request) {
-	var users []User
-
-	connection, _ := GetDatabase()
-	defer CloseDatabase(connection)
-
-	result := connection.Find(&users)
-
-	if result.Error != nil {
-		var err Error
-		err = SetError(err, "Failed to get users from the db")
-		w.Header().Set("Content-Type", "application/json")
-		json.NewEncoder(w).Encode(err)
-		return
-	}
-
-	for _, user := range users {
-		user.MarshalJSON()
-	}
-
-	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(users)
-}
-
-func ListControls(w http.ResponseWriter, r *http.Request) {
+func GetListControls(w http.ResponseWriter, r *http.Request) {
 	var controls []Control
 	connection, _ := GetDatabase()
 	defer CloseDatabase(connection)
@@ -290,58 +206,8 @@ func ListControls(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// for _, control := range controls {
-	// 	control.MarshalJSON()
-	// }
-
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(controls)
-}
-
-func ListAdmins(w http.ResponseWriter, r *http.Request) {
-	var admins []Admin
-
-	connection, _ := GetDatabase()
-	defer CloseDatabase(connection)
-
-	result := connection.Find(&admins)
-
-	if result.Error != nil {
-		var err Error
-		err = SetError(err, "Failed to get users from the db")
-		w.Header().Set("Content-Type", "application/json")
-		json.NewEncoder(w).Encode(err)
-		return
-	}
-
-	for _, admin := range admins {
-		admin.MarshalJSON()
-	}
-
-	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(admins)
-}
-
-func (a Admin) MarshalJSON() ([]byte, error) {
-	// prevent recursion
-	type admin Admin
-	x := admin(a)
-	// remove users password so it is not returned to the caller
-	x.Password = ""
-	return json.Marshal(x)
-}
-
-func (u User) MarshalJSON() ([]byte, error) {
-	// prevent recursion
-	type user User
-	x := user(u)
-	// remove users password so it is not returned to the caller
-	x.Password = ""
-	return json.Marshal(x)
-}
-
-func CreateAdminAccount(w http.ResponseWriter, r *http.Request) {
-	CreateAdmin(w, r)
 }
 
 func DeleteAccount(w http.ResponseWriter, r *http.Request) {
@@ -399,7 +265,7 @@ func DeleteAccount(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func Logout(w http.ResponseWriter, r *http.Request) {
+func PostLogout(w http.ResponseWriter, r *http.Request) {
 	//JWT tokens typically just expire
 	//are we going to implement something like cookies instead that we can revoke?
 }
