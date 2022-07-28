@@ -191,11 +191,8 @@ const handleSignUp = (event) => {
 
 const showLowerSections = () => {
   const queue = document.getElementsByClassName('queue');
-
   const cabinet = document.getElementsByClassName('cabinet');
-
   queue[0].classList.remove('hidden-section');
-
   cabinet[0].classList.remove('hidden-section');
 };
 
@@ -209,12 +206,10 @@ disableScroll();
 
 const enableScroll = () => {
   window.onscroll = function () {};
-
   showLowerSections();
 
   window.scrollBy({
     top: window.innerHeight,
-
     behavior: 'smooth',
   });
 };
