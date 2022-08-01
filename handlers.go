@@ -3,8 +3,10 @@ package main
 import (
 	"encoding/json"
 	"flag"
+	"fmt"
 	"log"
 	"net/http"
+	"time"
 
 	"github.com/gorilla/websocket"
 )
@@ -26,21 +28,21 @@ func SocketButton(w http.ResponseWriter, r *http.Request) {
 			log.Println("read:", err)
 			break
 		}
-		sw := string(message)
-		switch sw {
-		case "LU":
-			Left(false)
-		case "RU":
-			Right(false)
-		case "LD":
-			Left(true)
-		case "RD":
-			Right(true)
-		case "L":
-			Launch()
-		case "S":
-			Start()
-		}
+		// sw := string(message)
+		// switch sw {
+		// case "LU":
+		// 	Left(false)
+		// case "RU":
+		// 	Right(false)
+		// case "LD":
+		// 	Left(true)
+		// case "RD":
+		// 	Right(true)
+		// case "L":
+		// 	Launch()
+		// case "S":
+		// 	Start()
+		// }
 
 		log.Printf("recv: %s", message)
 		err = c.WriteMessage(mt, message)
@@ -67,7 +69,7 @@ func PostSignUp(w http.ResponseWriter, r *http.Request) {
 
 	var dbuser User
 	var curGame Game
-	var scores []Score
+	// var scores []Score
 	connection.Where("name = ?", user.Name).First(&dbuser)
 
 	//check email is alredy registered or not
@@ -98,12 +100,13 @@ func PostSignUp(w http.ResponseWriter, r *http.Request) {
 	connection.Where("name = ?", user.Name).First(&dbuser)
 	connection.Model(&curGame).Where("in_active = ?", false).Association("Users").Append(&user)
 	connection.Model(&curGame).Where("in_active = ?", false).Association("Scores").Append(&Score{User: user.ID})
+	// might not want this here
 	activeUser = user.ID.String()
 	w.Header().Set("Content-Type", "application/json")
-	// json.NewEncoder(w).Encode(user)
 
 	// get list of users to return as queued players
 	var users []User
+	var scores []Score
 	connection.Model(&curGame).Order("updated_at desc").Association("Users").Find(&users)
 	connection.Model(&curGame).Order("updated_at desc").Association("Scores").Find(&scores)
 	var players []Player
@@ -111,9 +114,30 @@ func PostSignUp(w http.ResponseWriter, r *http.Request) {
 	for _, element := range users {
 		players = append(players, Player{Name: element.Name, Initials: element.Initials, Class: GetScoreState(scores, element.ID)})
 	}
-	game := CurGame{players, activeUser}
 
-	json.NewEncoder(w).Encode(game)
+	// json.NewEncoder(w).Encode(players)
+	validToken, err := GenerateUserJWT(user.Name, user.ID.String())
+	if err != nil {
+		var err Error
+		err = SetError(err, "Failed to generate token")
+		w.Header().Set("Content-Type", "application/json")
+		json.NewEncoder(w).Encode(err)
+		return
+	}
+
+	expirationTime := time.Now().Add(time.Hour * 24)
+	http.SetCookie(w, &http.Cookie{
+		Name:    "Authorization",
+		Value:   "Bearer " + validToken,
+		Expires: expirationTime,
+	})
+
+	var token Token
+	token.Name = user.Name
+	token.ID = user.ID.String()
+	token.TokenString = validToken
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(token)
 }
 
 func GetCurrentGame(w http.ResponseWriter, r *http.Request) {
@@ -133,13 +157,12 @@ func GetCurrentGame(w http.ResponseWriter, r *http.Request) {
 	connection.Model(&curGame).Order("updated_at desc").Association("Users").Find(&users)
 	connection.Model(&curGame).Order("updated_at desc").Association("Scores").Find(&scores)
 	var players []Player
-
+	fmt.Printf("%+v\n", curGame)
 	for _, element := range users {
 		players = append(players, Player{Name: element.Name, Initials: element.Initials, Class: GetScoreState(scores, element.ID)})
 	}
-	game := CurGame{players, activeUser}
 
-	json.NewEncoder(w).Encode(game)
+	json.NewEncoder(w).Encode(players)
 }
 
 /*
@@ -203,7 +226,7 @@ func PostSignIn(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	validToken, err := GenerateUserJWT(authUser.Name, authUser.Role)
+	validToken, err := GenerateUserJWT(authUser.Name, authUser.ID.String())
 	if err != nil {
 		var err Error
 		err = SetError(err, "Failed to generate token")
@@ -214,7 +237,7 @@ func PostSignIn(w http.ResponseWriter, r *http.Request) {
 
 	var token Token
 	token.Name = authUser.Name
-	token.Role = authUser.Role
+	token.ID = authUser.ID.String()
 	token.TokenString = validToken
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(token)

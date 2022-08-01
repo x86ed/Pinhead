@@ -18,18 +18,42 @@ const signup = (name,initials) =>{
     
     fetch("/signup", requestOptions)
         .then(response => response.json())
+        .then(result => getList(result))
+        .catch(error => console.log('error', error));
+}
+
+const parseJwt =(token) => {
+    var base64Url = token.split('.')[1];
+    var base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+    var jsonPayload = decodeURIComponent(window.atob(base64).split('').map(function(c) {
+        return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
+    }).join(''));
+
+    return JSON.parse(jsonPayload);
+};
+
+const getList=(result)=>{
+    console.log(result);
+    const myHeaders = new Headers();
+    myHeaders.append("Content-Type", "application/json");
+    const requestOptions = {
+        method: 'GEt',
+        headers: myHeaders,
+        credentials: 'include',
+        redirect: 'follow'
+    };
+    
+    fetch("/game", requestOptions)
+        .then(response => response.json())
         .then(result => updateList(result))
         .catch(error => console.log('error', error));
 }
 
-let curID = '';
-
 const updateList = (result) => {
-    curID = result.cur_id;
     const queueList = document.getElementById('queue-list');
     
     let arr = [];
-    for (const element of result.players) {
+    for (const element of result) {
         let listItem = document.createElement('li');
         listItem.textContent = `${element.name} - ${element.initials}`;
         arr.push(listItem);
@@ -70,11 +94,6 @@ const requestOptions = {
   headers: myHeaders,
   redirect: 'follow'
 };
-
-fetch("/user", requestOptions)
-  .then(response => response.text())
-  .then(result => console.log(result))
-  .catch(error => console.log('error', error));
 
 const getSocketURI = () => {
     let loc = window.location, new_uri;

@@ -13,7 +13,7 @@ type AdminAuthentication struct {
 }
 
 type Token struct {
-	Role        string `json:"role"`
+	ID          string `json:"id"`
 	Name        string `json:"name"`
 	TokenString string `json:"token"`
 }

@@ -43,6 +43,7 @@ func PostNextTurn(w http.ResponseWriter, r *http.Request) {
 			connection.Model(&v).Updates(&Score{Complete: true})
 		}
 		if setNext {
+			activeUser = v.User.String()
 			connection.Model(&v).Updates(&Score{Active: true})
 		}
 	}

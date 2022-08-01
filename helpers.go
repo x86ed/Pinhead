@@ -49,12 +49,12 @@ func CheckPasswordHash(password, hash string) bool {
 }
 
 // Generate JWT token
-func GenerateUserJWT(name string, role string) (string, error) {
+func GenerateUserJWT(name string, id string) (string, error) {
 	token := jwt.New(jwt.SigningMethodHS256)
 	claims := token.Claims.(jwt.MapClaims)
 	claims["authorized"] = true
 	claims["name"] = name
-	claims["role"] = role
+	claims["id"] = id
 	claims["exp"] = time.Now().Add(time.Minute * 30).Unix()
 
 	tokenString, err := token.SignedString([]byte(userSecretKey))
