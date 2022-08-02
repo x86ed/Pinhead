@@ -42,6 +42,6 @@ type Player struct {
 }
 
 type ScoreUpdate struct {
-	ID    uuid.UUID `gorm:"type:uuid;primary_key;"`
-	Score int `json:"score"`
+	ID    string `json:"id"`
+	Score string `json:"score"`
 }

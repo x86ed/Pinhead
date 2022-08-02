@@ -64,8 +64,8 @@ func ServerStart() error {
 	go func() {
 		//this server is only available on local host to allow for adding an admin user
 		//don't change the ip address from localhost
-		fmt.Println("Local Admin Server started at http://localhost:44321")
-		http.ListenAndServe(":44321", handlers.CORS(handlers.AllowedHeaders([]string{"X-Requested-With", "Access-Control-Allow-Origin", "Content-Type"}), handlers.AllowedMethods([]string{"POST", "HEAD", "OPTIONS"}), handlers.AllowedOrigins([]string{"http://localhost:44321"}))(localRouter))
+		fmt.Println("Local Admin Server started at http://localhost:54321")
+		http.ListenAndServe(":54321", handlers.CORS(handlers.AllowedHeaders([]string{"X-Requested-With", "Access-Control-Allow-Origin", "Content-Type"}), handlers.AllowedMethods([]string{"POST", "HEAD", "OPTIONS"}), handlers.AllowedOrigins([]string{"http://localhost:54321"}))(localRouter))
 	}()
 
 	fmt.Println("Server started at http://localhost:8080")

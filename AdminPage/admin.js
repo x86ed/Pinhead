@@ -31,23 +31,41 @@ const deleteAdminUserBtn = () => {
 async function newGameBtn() {
     console.log("newGameBtn");
     await newGame();
+    HideButtons();
 }
 
 async function nextTurnBtn() {
     console.log("nextTurnBtn");
-    await nextTurn()
+    await nextTurn();
+    HideButtons();
 }
 
 async function highScoreBtn() {
     console.log("highScoreBtn");
-    await highScore()
+    await highScore();
+    HideButtons();
+}
+
+const HideButtons = () => {
+    document.getElementById("nextTurn").visibility = "hidden";
+    document.getElementById("highScore").visibility = "hidden";
 }
 
 async function updateScoreBtn() {
-    const inputVal = document.getElementById("updateScoreIn").value;
-    let playerList = document.getElementById('activePlayersList');
+    const score = document.getElementById("updateScoreIn").value;
+    let playerList = document.getElementById("activePlayersList");
     const userId = playerList.firstElementChild.value;
-    await updateScore(userId, inputVal);
+
+    console.log("updateScoreBtn: ", score);
+    var scoreUpdated = await updateScore(userId, score);
+    if (scoreUpdated) {
+        if (scoreUpdated.is_error) {
+            console.log("Failed to update score for userId: ", userId);
+            return;
+        }
+        document.getElementById("nextTurn").visibility = "visible";
+        document.getElementById("highScore").visibility = "visible";
+    }
 }
 
 async function getPlayersBtn() {

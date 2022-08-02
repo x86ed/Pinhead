@@ -3,6 +3,7 @@ package main
 import (
 	"encoding/json"
 	"net/http"
+	"strconv"
 )
 
 func AdminIndex(w http.ResponseWriter, r *http.Request) {
@@ -69,8 +70,9 @@ func UpdateScore(w http.ResponseWriter, r *http.Request) {
 	connection.Model(&curGame).Where("in_active = ?", false).First(&curGame)
 	connection.Model(&curGame).Where("in_active = ?", false).Order("updated_at desc").Association("Scores").Find(&scores)
 	for _, v := range scores {
-		if v.User == newScore.ID {
-			connection.Model(&v).Updates(&Score{Score: int64(newScore.Score)})
+		if v.User.String() == newScore.ID {
+			score, _ := strconv.Atoi(newScore.Score);
+			connection.Model(&v).Updates(&Score{Score: int64(score)})
 		}
 	}
 	w.Header().Set("Content-Type", "application/json")
