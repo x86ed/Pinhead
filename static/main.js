@@ -34,6 +34,81 @@ const parseJwt =(token) => {
 
 const getList=(result)=>{
     window.localStorage.setItem('user',result.id);
+
+    if (ws) {
+        return false;
+    }
+    ws = new WebSocket(getSocketURI());
+    ws.onopen = function(evt) {
+        console.log("OPEN");
+    }
+    ws.onclose = function(evt) {
+        console.log("CLOSE");
+        ws = null;
+    }
+    ws.onmessage = function(evt) {
+        console.log("RESPONSE: " + evt.data);
+        if (evt.data === "NEW TURN"){
+            const myHeaders = new Headers();
+            myHeaders.append("Content-Type", "application/json");
+            const requestOptions = {
+                method: 'GET',
+                headers: myHeaders,
+                credentials: 'include',
+                redirect: 'follow'
+            };
+            
+            fetch("/game", requestOptions)
+                .then(response => response.json())
+                .then(result => updateList(result))
+                .catch(error => console.log('error', error));
+        }
+    }
+    ws.onerror = function(evt) {
+        console.log("ERROR: " + evt.data);
+    }
+
+    fetch("/controls", )
+    .then(response => response.json())
+    .then(result => bindHandlers(result))
+    .catch(error => console.log('error', error));
+
+    const bindHandlers = (ButtonCommands)=>{
+        ButtonCommands.map((com)=>{
+            if (com.dom_id.length){
+                if (com.down_command.length){
+                    if (!com.up_command.length){
+                        document.getElementById(com.dom_id).onclick = () => {wsSend(com.down_command)};
+                    }else{
+                        document.getElementById(com.dom_id).onmousedown = () => {wsSend(com.down_command)};
+                    }
+                }
+                if (com.up_command.length){
+                    document.getElementById(com.dom_id).onmouseup = ()=> {wsSend(com.up_command)};
+                }
+            }
+        });
+
+
+        document.onkeyup = function (e) {
+            e = e || window.event;
+            ButtonCommands.forEach((com)=>{
+                if(com.keys.indexOf(e.key)>-1){
+                    wsSend(com.down_command);
+                }
+            });
+        };
+
+        document.onkeydown = function (e) {
+            e = e || window.event;
+            ButtonCommands.forEach((com)=>{
+                if(com.keys.indexOf(e.key)>-1){
+                    wsSend(com.up_command);
+                }
+            });
+        };
+    }
+
     const myHeaders = new Headers();
     myHeaders.append("Content-Type", "application/json");
     const requestOptions = {
@@ -121,79 +196,6 @@ const wsSend = (val) =>{
 }
 
 document.querySelector("body").onload = (evt) => {
-    if (ws) {
-        return false;
-    }
-    ws = new WebSocket(getSocketURI());
-    ws.onopen = function(evt) {
-        console.log("OPEN");
-    }
-    ws.onclose = function(evt) {
-        console.log("CLOSE");
-        ws = null;
-    }
-    ws.onmessage = function(evt) {
-        console.log("RESPONSE: " + evt.data);
-        if (evt.data === "NEW TURN"){
-            const myHeaders = new Headers();
-            myHeaders.append("Content-Type", "application/json");
-            const requestOptions = {
-                method: 'GET',
-                headers: myHeaders,
-                credentials: 'include',
-                redirect: 'follow'
-            };
-            
-            fetch("/game", requestOptions)
-                .then(response => response.json())
-                .then(result => updateList(result))
-                .catch(error => console.log('error', error));
-        }
-    }
-    ws.onerror = function(evt) {
-        console.log("ERROR: " + evt.data);
-    }
-
-    fetch("/controls", )
-    .then(response => response.json())
-    .then(result => bindHandlers(result))
-    .catch(error => console.log('error', error));
-
-    const bindHandlers = (ButtonCommands)=>{
-        ButtonCommands.map((com)=>{
-            if (com.dom_id.length){
-                if (com.down_command.length){
-                    if (!com.up_command.length){
-                        document.getElementById(com.dom_id).onclick = () => {wsSend(com.down_command)};
-                    }else{
-                        document.getElementById(com.dom_id).onmousedown = () => {wsSend(com.down_command)};
-                    }
-                }
-                if (com.up_command.length){
-                    document.getElementById(com.dom_id).onmouseup = ()=> {wsSend(com.up_command)};
-                }
-            }
-        });
-
-
-        document.onkeyup = function (e) {
-            e = e || window.event;
-            ButtonCommands.forEach((com)=>{
-                if(com.keys.indexOf(e.key)>-1){
-                    wsSend(com.down_command);
-                }
-            });
-        };
-
-        document.onkeydown = function (e) {
-            e = e || window.event;
-            ButtonCommands.forEach((com)=>{
-                if(com.keys.indexOf(e.key)>-1){
-                    wsSend(com.up_command);
-                }
-            });
-        };
-    }
 
     // Sign Up
     document.getElementById("signup-button").addEventListener("click", handleSignUp);
