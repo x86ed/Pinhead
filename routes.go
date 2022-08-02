@@ -22,14 +22,15 @@ func InitializeStatic() {
 
 // initialize all routes
 func InitializeRoute() {
-	router.HandleFunc("/signup", SignUp).Methods("POST")
-	router.HandleFunc("/signin", UserSignIn).Methods("POST")
+	router.HandleFunc("/signup", PostSignUp).Methods("POST")
+	router.HandleFunc("/signin", PostSignIn).Methods("POST")
 
-	router.HandleFunc("/user", IsAuthorizedUser(UserIndex)).Methods("GET")
-	router.HandleFunc("/controls", ListControls).Methods("GET")
+	router.HandleFunc("/controls", GetListControls).Methods("GET")
+	router.HandleFunc("/game", IsAuthorizedUser(GetCurrentGame)).Methods("GET")
 
-	router.HandleFunc("/buttonpress", echo).Methods("GET")
-	router.HandleFunc("/logout", IsAuthorizedUser(Logout)).Methods("POST")
+	// Websocket route
+	router.HandleFunc("/buttonpress/{userID}", SocketButton).Methods("GET")
+	router.HandleFunc("/logout", IsAuthorizedUser(PostLogout)).Methods("POST")
 	router.Methods("OPTIONS").HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Access-Control-Allow-Origin", "")
 		w.Header().Set("Access-Control-Allow-Methods", "POST, GET, OPTIONS, PUT, DELETE")
@@ -37,17 +38,16 @@ func InitializeRoute() {
 	})
 
 	//local server for admin
-	localRouter.HandleFunc("/users", IsAuthorizedAdmin(ListUsers)).Methods("GET")
-	localRouter.HandleFunc("/admins", IsAuthorizedAdmin(ListAdmins)).Methods("GET")
+	localRouter.HandleFunc("/users", IsAuthorizedAdmin(GetListUsers)).Methods("GET")
+	localRouter.HandleFunc("/admins", IsAuthorizedAdmin(GetListAdmins)).Methods("GET")
 
-	localRouter.HandleFunc("/new_game", IsAuthorizedAdmin(NewGame)).Methods("POST")
-	localRouter.HandleFunc("/next_turn", IsAuthorizedAdmin(NextTurn)).Methods("POST")
-	localRouter.HandleFunc("/high_score", IsAuthorizedAdmin(HighScore)).Methods("POST")
-	localRouter.HandleFunc("/update_score", IsAuthorizedAdmin(UpdateScore)).Methods("POST")
+	localRouter.HandleFunc("/new_game", IsAuthorizedAdmin(PostNewGame)).Methods("POST")
+	localRouter.HandleFunc("/next_turn", IsAuthorizedAdmin(PostNextTurn)).Methods("POST")
+	localRouter.HandleFunc("/high_score", IsAuthorizedAdmin(PostHighScore)).Methods("POST")
+	localRouter.HandleFunc("/update_score", IsAuthorizedAdmin(PostUpdateScore)).Methods("POST")
 
-	localRouter.HandleFunc("/signin", AdminSignIn).Methods("POST")
-	localRouter.HandleFunc("/admin", IsAuthorizedAdmin(CreateAdmin)).Methods("POST")
-	localRouter.HandleFunc("/admin", IsAuthorizedAdmin(CreateAdminAccount)).Methods("POST")
+	localRouter.HandleFunc("/signin", PostAdminSignIn).Methods("POST")
+	localRouter.HandleFunc("/admin", IsAuthorizedAdmin(PostCreateAdmin)).Methods("POST")
 	localRouter.HandleFunc("/admin", IsAuthorizedAdmin(DeleteAccount)).Methods("DELETE")
 
 	localRouter.Methods("OPTIONS").HandlerFunc(func(w http.ResponseWriter, r *http.Request) {

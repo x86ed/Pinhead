@@ -17,9 +17,11 @@ var (
 	adminUser, _      = GoDotEnvVariable("ADMINEMAIL")
 	adminPass, _      = GoDotEnvVariable("ADMINPASS")
 	activeUser        string
+	currentUser       = make(chan string, 1)
 )
 
 func main() {
+	defer close(currentUser)
 	err := InitialMigration()
 	if err != nil {
 		log.Fatal("Couldn't initalize service")

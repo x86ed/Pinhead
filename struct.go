@@ -8,18 +8,18 @@ type Authentication struct {
 }
 
 type AdminAuthentication struct {
-	Email     string `json:"email"`
+	Email    string `json:"email"`
 	Password string `json:"password"`
 }
 
 type Token struct {
-	Role        string `json:"role"`
+	ID          string `json:"id"`
 	Name        string `json:"name"`
 	TokenString string `json:"token"`
 }
 
 type AdminToken struct {
-	Email        string `json:"email"`
+	Email       string `json:"email"`
 	TokenString string `json:"token"`
 }
 
@@ -35,9 +35,15 @@ const (
 )
 
 type Player struct {
-	Name     string
-	Initials string
-	Class    string
+	Name     string `json:"name"`
+	Initials string `json:"initials"`
+	Class    string `json:"class"`
+	Score    int    `json:"score"`
+}
+
+type CurGame struct {
+	Players []Player `json:"players"`
+	CurID   string   `json:"cur_id"`
 }
 
 type ScoreUpdate struct {
