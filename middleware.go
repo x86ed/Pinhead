@@ -45,17 +45,9 @@ func IsAuthorizedUser(handler http.HandlerFunc) http.HandlerFunc {
 			return
 		}
 
-		if claims, ok := token.Claims.(jwt.MapClaims); ok && token.Valid {
-			r.Header.Set("Name", fmt.Sprintf("%v", claims["name"]))
-			if claims["role"] == "admin" {
-				r.Header.Set("Role", "admin")
-				handler.ServeHTTP(w, r)
-				return
-			} else if claims["role"] == "user" {
-				r.Header.Set("Role", "user")
-				handler.ServeHTTP(w, r)
-				return
-			}
+		if _, ok := token.Claims.(jwt.MapClaims); ok && token.Valid {
+			handler.ServeHTTP(w, r)
+			return
 			// if the role claim is unknown then user will not be authorized
 		}
 		var reserr Error

@@ -3,11 +3,11 @@ package main
 import (
 	"encoding/json"
 	"flag"
-	"fmt"
 	"log"
 	"net/http"
 	"time"
 
+	"github.com/gorilla/mux"
 	"github.com/gorilla/websocket"
 )
 
@@ -16,6 +16,7 @@ var addr = flag.String("addr", "localhost:8080", "http service address")
 var upgrader = websocket.Upgrader{} // use default options
 
 func SocketButton(w http.ResponseWriter, r *http.Request) {
+	params := mux.Vars(r)
 	c, err := upgrader.Upgrade(w, r, nil)
 	if err != nil {
 		log.Print("upgrade:", err)
@@ -28,22 +29,30 @@ func SocketButton(w http.ResponseWriter, r *http.Request) {
 			log.Println("read:", err)
 			break
 		}
-		// sw := string(message)
-		// switch sw {
-		// case "LU":
-		// 	Left(false)
-		// case "RU":
-		// 	Right(false)
-		// case "LD":
-		// 	Left(true)
-		// case "RD":
-		// 	Right(true)
-		// case "L":
-		// 	Launch()
-		// case "S":
-		// 	Start()
-		// }
 
+		sw := string(message)
+		if params["userID"] != activeUser {
+			switch sw {
+			case "LU":
+				Left(false)
+			case "RU":
+				Right(false)
+			case "LD":
+				Left(true)
+			case "RD":
+				Right(true)
+			case "L":
+				Launch()
+			case "S":
+				Start()
+			}
+		}
+		for usr := range currentUser {
+			if usr != activeUser {
+				activeUser = usr
+				c.WriteMessage(mt, []byte("NEW TURN"))
+			}
+		}
 		log.Printf("recv: %s", message)
 		err = c.WriteMessage(mt, message)
 		if err != nil {
@@ -101,7 +110,9 @@ func PostSignUp(w http.ResponseWriter, r *http.Request) {
 	connection.Model(&curGame).Where("in_active = ?", false).Association("Users").Append(&user)
 	connection.Model(&curGame).Where("in_active = ?", false).Association("Scores").Append(&Score{User: user.ID})
 	// might not want this here
-	activeUser = user.ID.String()
+	if len(activeUser) < 1 {
+		currentUser <- user.ID.String()
+	}
 	w.Header().Set("Content-Type", "application/json")
 
 	// get list of users to return as queued players
@@ -147,7 +158,6 @@ func GetCurrentGame(w http.ResponseWriter, r *http.Request) {
 	var curGame Game
 	var scores []Score
 
-	// insert user details in database
 	connection.Model(&curGame).Where("in_active = ?", false).First(&curGame)
 	w.Header().Set("Content-Type", "application/json")
 	// json.NewEncoder(w).Encode(user)
@@ -157,12 +167,11 @@ func GetCurrentGame(w http.ResponseWriter, r *http.Request) {
 	connection.Model(&curGame).Order("updated_at desc").Association("Users").Find(&users)
 	connection.Model(&curGame).Order("updated_at desc").Association("Scores").Find(&scores)
 	var players []Player
-	fmt.Printf("%+v\n", curGame)
 	for _, element := range users {
 		players = append(players, Player{Name: element.Name, Initials: element.Initials, Class: GetScoreState(scores, element.ID)})
 	}
 
-	json.NewEncoder(w).Encode(players)
+	json.NewEncoder(w).Encode(users)
 }
 
 /*

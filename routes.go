@@ -29,7 +29,7 @@ func InitializeRoute() {
 	router.HandleFunc("/game", IsAuthorizedUser(GetCurrentGame)).Methods("GET")
 
 	// Websocket route
-	router.HandleFunc("/buttonpress", SocketButton).Methods("GET")
+	router.HandleFunc("/buttonpress/{userID}", SocketButton).Methods("GET")
 	router.HandleFunc("/logout", IsAuthorizedUser(PostLogout)).Methods("POST")
 	router.Methods("OPTIONS").HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Access-Control-Allow-Origin", "")

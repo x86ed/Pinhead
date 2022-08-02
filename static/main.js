@@ -33,11 +33,11 @@ const parseJwt =(token) => {
 };
 
 const getList=(result)=>{
-    console.log(result);
+    window.localStorage.setItem('user',result.id);
     const myHeaders = new Headers();
     myHeaders.append("Content-Type", "application/json");
     const requestOptions = {
-        method: 'GEt',
+        method: 'GET',
         headers: myHeaders,
         credentials: 'include',
         redirect: 'follow'
@@ -103,7 +103,7 @@ const getSocketURI = () => {
         new_uri = "ws:";
     }
     new_uri += "//" + loc.host;
-    new_uri += loc.pathname + "buttonpress";
+    new_uri += loc.pathname + "buttonpress/" + window.localStorage.getItem("user");
     return new_uri;
 }
 
@@ -134,6 +134,21 @@ document.querySelector("body").onload = (evt) => {
     }
     ws.onmessage = function(evt) {
         console.log("RESPONSE: " + evt.data);
+        if (evt.data === "NEW TURN"){
+            const myHeaders = new Headers();
+            myHeaders.append("Content-Type", "application/json");
+            const requestOptions = {
+                method: 'GET',
+                headers: myHeaders,
+                credentials: 'include',
+                redirect: 'follow'
+            };
+            
+            fetch("/game", requestOptions)
+                .then(response => response.json())
+                .then(result => updateList(result))
+                .catch(error => console.log('error', error));
+        }
     }
     ws.onerror = function(evt) {
         console.log("ERROR: " + evt.data);
