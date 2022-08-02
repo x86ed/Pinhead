@@ -34,7 +34,20 @@ const parseJwt =(token) => {
 
 const getList=(result)=>{
     window.localStorage.setItem('user',result.id);
-
+    const myHeaders = new Headers();
+    myHeaders.append("Content-Type", "application/json");
+    const requestOptions = {
+        method: 'GET',
+        headers: myHeaders,
+        credentials: 'include',
+        redirect: 'follow'
+    };
+    
+    fetch("/game", requestOptions)
+        .then(response => response.json())
+        .then(result => updateList(result))
+        .catch(error => console.log('error', error));
+    
     if (ws) {
         return false;
     }
@@ -108,20 +121,6 @@ const getList=(result)=>{
             });
         };
     }
-
-    const myHeaders = new Headers();
-    myHeaders.append("Content-Type", "application/json");
-    const requestOptions = {
-        method: 'GET',
-        headers: myHeaders,
-        credentials: 'include',
-        redirect: 'follow'
-    };
-    
-    fetch("/game", requestOptions)
-        .then(response => response.json())
-        .then(result => updateList(result))
-        .catch(error => console.log('error', error));
 }
 
 const updateList = (result) => {
