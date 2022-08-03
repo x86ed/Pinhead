@@ -17,89 +17,37 @@ const signup = (name,initials) =>{
     };
     
     fetch("/signup", requestOptions)
-        .then(response => response.text())
-        .then(result => updateList(result))
+        .then(response => response.json())
+        .then(result => getList(result))
         .catch(error => console.log('error', error));
 }
 
-const updateList = (result) => {
-    
-    let queueList = document.getElementById('queue-list');
-    
-    let arr = [];
-    for (const element of JSON.parse(result)) {
-        let listItem = document.createElement('li');
-        listItem.textContent = `${element.Name} - ${element.Initials}`;
-        arr.push(listItem);
-    }
-    
-    arr[0].classList.add("user");
-    
-    queueList.replaceChildren(...arr);
-}
+const parseJwt =(token) => {
+    var base64Url = token.split('.')[1];
+    var base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+    var jsonPayload = decodeURIComponent(window.atob(base64).split('').map(function(c) {
+        return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
+    }).join(''));
 
-const signin = (name,initials)=>{
-    const myHeaders = new Headers();
-    myHeaders.append("Content-Type", "application/json");
-
-    const raw = JSON.stringify({
-        "name": name,
-        "password": name+initials
-    });
-
-    const requestOptions = {
-        method: 'POST',
-        headers: myHeaders,
-        body: raw,
-        redirect: 'follow'
-    };
-
-    fetch("/signin", requestOptions)
-    .then(response => response.text())
-    .then(result => console.log(result))
-    .catch(error => console.log('error', error));
-}
-
-const myHeaders = new Headers();
-myHeaders.append("Authorization", "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhdXRob3JpemVkIjp0cnVlLCJleHAiOjE2NTU2Njg5MjAsIm5hbWUiOiJkZXJwIiwicm9sZSI6InVzZXIifQ.w09Rwoa7X0Fu5aMXrvQ5KMwA5VeSpMhSJ1j24snTdJU");
-
-const requestOptions = {
-  method: 'GET',
-  headers: myHeaders,
-  redirect: 'follow'
+    return JSON.parse(jsonPayload);
 };
 
-fetch("/user", requestOptions)
-  .then(response => response.text())
-  .then(result => console.log(result))
-  .catch(error => console.log('error', error));
-
-const getSocketURI = () => {
-    let loc = window.location, new_uri;
-    if (loc.protocol === "https:") {
-        new_uri = "wss:";
-    } else {
-        new_uri = "ws:";
-    }
-    new_uri += "//" + loc.host;
-    new_uri += loc.pathname + "buttonpress";
-    return new_uri;
-}
-
-let output = document.getElementById("output");
-let input = document.getElementById("input");
-let ws;
-
-const wsSend = (val) =>{
-    if (!ws || !val.length){
-        return false;
-    }
-    console.log(`SEND: ${val}`);
-    ws.send(val);
-    return false;
-}
-
-document.querySelector("body").onload = (evt) => {
+const getList=(result)=>{
+    window.localStorage.setItem('user',result.id);
+    const myHeaders = new Headers();
+    myHeaders.append("Content-Type", "application/json");
+    const requestOptions = {
+        method: 'GET',
+        headers: myHeaders,
+        credentials: 'include',
+        redirect: 'follow'
+    };
+    
+    fetch("/game", requestOptions)
+        .then(response => response.json())
+        .then(result => updateList(result))
+        .catch(error => console.log('error', error));
+    
     if (ws) {
         return false;
     }
@@ -113,6 +61,21 @@ document.querySelector("body").onload = (evt) => {
     }
     ws.onmessage = function(evt) {
         console.log("RESPONSE: " + evt.data);
+        if (evt.data === "NEW TURN"){
+            const myHeaders = new Headers();
+            myHeaders.append("Content-Type", "application/json");
+            const requestOptions = {
+                method: 'GET',
+                headers: myHeaders,
+                credentials: 'include',
+                redirect: 'follow'
+            };
+            
+            fetch("/game", requestOptions)
+                .then(response => response.json())
+                .then(result => updateList(result))
+                .catch(error => console.log('error', error));
+        }
     }
     ws.onerror = function(evt) {
         console.log("ERROR: " + evt.data);
@@ -158,6 +121,80 @@ document.querySelector("body").onload = (evt) => {
             });
         };
     }
+}
+
+const updateList = (result) => {
+    const queueList = document.getElementById('queue-list');
+    
+    let arr = [];
+    for (const element of result) {
+        let listItem = document.createElement('li');
+        listItem.textContent = `${element.name} - ${element.initials}`;
+        arr.push(listItem);
+    }
+    
+    arr[0].classList.add("user");
+    
+    queueList.replaceChildren(...arr);
+}
+
+const signin = (name,initials)=>{
+    const myHeaders = new Headers();
+    myHeaders.append("Content-Type", "application/json");
+
+    const raw = JSON.stringify({
+        "name": name,
+        "password": name+initials
+    });
+
+    const requestOptions = {
+        method: 'POST',
+        headers: myHeaders,
+        body: raw,
+        redirect: 'follow'
+    };
+
+    fetch("/signin", requestOptions)
+    .then(response => response.text())
+    .then(result => console.log(result))
+    .catch(error => console.log('error', error));
+}
+
+const myHeaders = new Headers();
+myHeaders.append("Authorization", "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhdXRob3JpemVkIjp0cnVlLCJleHAiOjE2NTU2Njg5MjAsIm5hbWUiOiJkZXJwIiwicm9sZSI6InVzZXIifQ.w09Rwoa7X0Fu5aMXrvQ5KMwA5VeSpMhSJ1j24snTdJU");
+
+const requestOptions = {
+  method: 'GET',
+  headers: myHeaders,
+  redirect: 'follow'
+};
+
+const getSocketURI = () => {
+    let loc = window.location, new_uri;
+    if (loc.protocol === "https:") {
+        new_uri = "wss:";
+    } else {
+        new_uri = "ws:";
+    }
+    new_uri += "//" + loc.host;
+    new_uri += loc.pathname + "buttonpress/" + window.localStorage.getItem("user");
+    return new_uri;
+}
+
+let output = document.getElementById("output");
+let input = document.getElementById("input");
+let ws;
+
+const wsSend = (val) =>{
+    if (!ws || !val.length){
+        return false;
+    }
+    console.log(`SEND: ${val}`);
+    ws.send(val);
+    return false;
+}
+
+document.querySelector("body").onload = (evt) => {
 
     // Sign Up
     document.getElementById("signup-button").addEventListener("click", handleSignUp);

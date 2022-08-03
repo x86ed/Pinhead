@@ -162,6 +162,8 @@ export async function updateScore(userId, score) {
         redirect: 'follow'
     };
 
+    console.log("update_score: ", requestOptions);
+
     try {
         var response = await fetch(baseUrl + "update_score", requestOptions)
         var result = await response.text();

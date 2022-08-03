@@ -80,11 +80,11 @@ async function getPlayersBtn() {
             window.location.href = "signin.html";
             return;
         }
-
+        console.log("player: ", playerList);
         playerList.forEach((player) => {
             let li = document.createElement("bx-list-item");
-            li.innerText = player.Name;
-            li.value = player.ID;
+            li.innerText = player.name;
+            li.value = player.id;
             list.appendChild(li);
         });
     }

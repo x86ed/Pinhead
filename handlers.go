@@ -5,7 +5,9 @@ import (
 	"flag"
 	"log"
 	"net/http"
+	"time"
 
+	"github.com/gorilla/mux"
 	"github.com/gorilla/websocket"
 )
 
@@ -13,7 +15,8 @@ var addr = flag.String("addr", "localhost:8080", "http service address")
 
 var upgrader = websocket.Upgrader{} // use default options
 
-func echo(w http.ResponseWriter, r *http.Request) {
+func SocketButton(w http.ResponseWriter, r *http.Request) {
+	params := mux.Vars(r)
 	c, err := upgrader.Upgrade(w, r, nil)
 	if err != nil {
 		log.Print("upgrade:", err)
@@ -26,22 +29,30 @@ func echo(w http.ResponseWriter, r *http.Request) {
 			log.Println("read:", err)
 			break
 		}
-		sw := string(message)
-		switch sw {
-		case "LU":
-			Left(false)
-		case "RU":
-			Right(false)
-		case "LD":
-			Left(true)
-		case "RD":
-			Right(true)
-		case "L":
-			Launch()
-		case "S":
-			Start()
-		}
 
+		sw := string(message)
+		if params["userID"] != activeUser {
+			switch sw {
+			case "LU":
+				Left(false)
+			case "RU":
+				Right(false)
+			case "LD":
+				Left(true)
+			case "RD":
+				Right(true)
+			case "L":
+				Launch()
+			case "S":
+				Start()
+			}
+		}
+		for usr := range currentUser {
+			if usr != activeUser {
+				activeUser = usr
+				c.WriteMessage(mt, []byte("NEW TURN"))
+			}
+		}
 		log.Printf("recv: %s", message)
 		err = c.WriteMessage(mt, message)
 		if err != nil {
@@ -51,7 +62,7 @@ func echo(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func SignUp(w http.ResponseWriter, r *http.Request) {
+func PostSignUp(w http.ResponseWriter, r *http.Request) {
 	connection, _ := GetDatabase()
 	defer CloseDatabase(connection)
 
@@ -67,7 +78,7 @@ func SignUp(w http.ResponseWriter, r *http.Request) {
 
 	var dbuser User
 	var curGame Game
-	var scores []Score
+	// var scores []Score
 	connection.Where("name = ?", user.Name).First(&dbuser)
 
 	//check email is alredy registered or not
@@ -98,11 +109,15 @@ func SignUp(w http.ResponseWriter, r *http.Request) {
 	connection.Where("name = ?", user.Name).First(&dbuser)
 	connection.Model(&curGame).Where("in_active = ?", false).Association("Users").Append(&user)
 	connection.Model(&curGame).Where("in_active = ?", false).Association("Scores").Append(&Score{User: user.ID})
+	// might not want this here
+	if len(activeUser) < 1 {
+		currentUser <- user.ID.String()
+	}
 	w.Header().Set("Content-Type", "application/json")
-	// json.NewEncoder(w).Encode(user)
 
 	// get list of users to return as queued players
 	var users []User
+	var scores []Score
 	connection.Model(&curGame).Order("updated_at desc").Association("Users").Find(&users)
 	connection.Model(&curGame).Order("updated_at desc").Association("Scores").Find(&scores)
 	var players []Player
@@ -111,51 +126,8 @@ func SignUp(w http.ResponseWriter, r *http.Request) {
 		players = append(players, Player{ID: element.ID, Name: element.Name, Initials: element.Initials, Class: GetScoreState(scores, element.ID)})
 	}
 
-	json.NewEncoder(w).Encode(players)
-}
-
-func HandleQueue() {
-	connection, _ := GetDatabase()
-	defer CloseDatabase(connection)
-}
-
-func AdminSignIn(w http.ResponseWriter, r *http.Request) {
-	connection, _ := GetDatabase()
-	defer CloseDatabase(connection)
-
-	var authDetails AdminAuthentication
-
-	err := json.NewDecoder(r.Body).Decode(&authDetails)
-	if err != nil {
-		var err Error
-		err = SetError(err, "Error in reading payload.")
-		w.Header().Set("Content-Type", "application/json")
-		json.NewEncoder(w).Encode(err)
-		return
-	}
-
-	var authUser Admin
-	connection.Where("email = 	?", authDetails.Email).First(&authUser)
-
-	if authUser.Email == "" {
-		var err Error
-		err = SetError(err, "Username or Password is incorrect")
-		w.Header().Set("Content-Type", "application/json")
-		json.NewEncoder(w).Encode(err)
-		return
-	}
-
-	check := CheckPasswordHash(authDetails.Password, authUser.Password)
-
-	if !check {
-		var err Error
-		err = SetError(err, "Username or Password is incorrect")
-		w.Header().Set("Content-Type", "application/json")
-		json.NewEncoder(w).Encode(err)
-		return
-	}
-
-	validToken, err := GenerateAdminJWT(authUser.Email)
+	// json.NewEncoder(w).Encode(players)
+	validToken, err := GenerateUserJWT(user.Name, user.ID.String())
 	if err != nil {
 		var err Error
 		err = SetError(err, "Failed to generate token")
@@ -164,15 +136,52 @@ func AdminSignIn(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	var token AdminToken
-	token.Email = authUser.Email
+	expirationTime := time.Now().Add(time.Hour * 24)
+	http.SetCookie(w, &http.Cookie{
+		Name:    "Authorization",
+		Value:   "Bearer " + validToken,
+		Expires: expirationTime,
+	})
+
+	var token Token
+	token.Name = user.Name
+	token.ID = user.ID.String()
 	token.TokenString = validToken
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(token)
 }
 
+func GetCurrentGame(w http.ResponseWriter, r *http.Request) {
+	connection, _ := GetDatabase()
+	defer CloseDatabase(connection)
+
+	var curGame Game
+	var scores []Score
+
+	connection.Model(&curGame).Where("in_active = ?", false).First(&curGame)
+	w.Header().Set("Content-Type", "application/json")
+	// json.NewEncoder(w).Encode(user)
+
+	// get list of users to return as queued players
+	var users []User
+	connection.Model(&curGame).Order("updated_at desc").Association("Users").Find(&users)
+	connection.Model(&curGame).Order("updated_at desc").Association("Scores").Find(&scores)
+	var players []Player
+	for _, element := range users {
+		players = append(players, Player{ID: element.ID, Name: element.Name, Initials: element.Initials, Class: GetScoreState(scores, element.ID)})
+	}
+
+	//Should this be returning the player???
+	json.NewEncoder(w).Encode(users)
+}
+
+func HandleQueue() {
+	connection, _ := GetDatabase()
+	defer CloseDatabase(connection)
+}
+
 //signin in the same action for users and admins but with different secretkey credentials
-func UserSignIn(w http.ResponseWriter, r *http.Request) {
+func PostSignIn(w http.ResponseWriter, r *http.Request) {
 	connection, _ := GetDatabase()
 	defer CloseDatabase(connection)
 
@@ -208,7 +217,7 @@ func UserSignIn(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	validToken, err := GenerateUserJWT(authUser.Name, authUser.Role)
+	validToken, err := GenerateUserJWT(authUser.Name, authUser.ID.String())
 	if err != nil {
 		var err Error
 		err = SetError(err, "Failed to generate token")
@@ -219,45 +228,13 @@ func UserSignIn(w http.ResponseWriter, r *http.Request) {
 
 	var token Token
 	token.Name = authUser.Name
-	token.Role = authUser.Role
+	token.ID = authUser.ID.String()
 	token.TokenString = validToken
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(token)
 }
 
-func UserIndex(w http.ResponseWriter, r *http.Request) {
-	if r.Header.Get("Role") != "user" {
-		w.Write([]byte("Not Authorized."))
-		return
-	}
-	w.Write([]byte("Welcome, User."))
-}
-
-func ListUsers(w http.ResponseWriter, r *http.Request) {
-	var users []User
-
-	connection, _ := GetDatabase()
-	defer CloseDatabase(connection)
-
-	result := connection.Find(&users)
-
-	if result.Error != nil {
-		var err Error
-		err = SetError(err, "Failed to get users from the db")
-		w.Header().Set("Content-Type", "application/json")
-		json.NewEncoder(w).Encode(err)
-		return
-	}
-
-	for _, user := range users {
-		user.MarshalJSON()
-	}
-
-	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(users)
-}
-
-func ListControls(w http.ResponseWriter, r *http.Request) {
+func GetListControls(w http.ResponseWriter, r *http.Request) {
 	var controls []Control
 	connection, _ := GetDatabase()
 	defer CloseDatabase(connection)
@@ -271,86 +248,8 @@ func ListControls(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// for _, control := range controls {
-	// 	control.MarshalJSON()
-	// }
-
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(controls)
-}
-
-func ListAdmins(w http.ResponseWriter, r *http.Request) {
-	var admins []Admin
-
-	connection, _ := GetDatabase()
-	defer CloseDatabase(connection)
-
-	result := connection.Find(&admins)
-
-	if result.Error != nil {
-		var err Error
-		err = SetError(err, "Failed to get users from the db")
-		w.Header().Set("Content-Type", "application/json")
-		json.NewEncoder(w).Encode(err)
-		return
-	}
-
-	for _, admin := range admins {
-		admin.MarshalJSON()
-	}
-
-	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(admins)
-}
-
-func ListActivePlayers(w http.ResponseWriter, r *http.Request) {
-	connection, _ := GetDatabase()
-	defer CloseDatabase(connection)
-
-	// get list of users to return as queued players
-	var scores []Score
-	var users []User
-	var curGame Game
-
-	connection.Model(&curGame).Where("in_active = ?", false).First(&curGame)
-
-	connection.Model(&curGame).Order("updated_at desc").Association("Users").Find(&users)
-	connection.Model(&curGame).Order("updated_at desc").Association("Scores").Find(&scores)
-	var players []Player
-	
-	for _, element := range users {
-		players = append(players, Player{ID: element.ID, Name: element.Name, Initials: element.Initials, Class: GetScoreState(scores, element.ID)})
-	}
-	
-	//playerlist is in reverse order => 
-	for i, j := 0, len(players)-1; i < j; i, j = i+1, j-1 {
-        players[i], players[j] = players[j], players[i]
-    }
-
-	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(players)
-}
-
-func (a Admin) MarshalJSON() ([]byte, error) {
-	// prevent recursion
-	type admin Admin
-	x := admin(a)
-	// remove users password so it is not returned to the caller
-	x.Password = ""
-	return json.Marshal(x)
-}
-
-func (u User) MarshalJSON() ([]byte, error) {
-	// prevent recursion
-	type user User
-	x := user(u)
-	// remove users password so it is not returned to the caller
-	x.Password = ""
-	return json.Marshal(x)
-}
-
-func CreateAdminAccount(w http.ResponseWriter, r *http.Request) {
-	CreateAdmin(w, r)
 }
 
 func DeleteAccount(w http.ResponseWriter, r *http.Request) {
@@ -408,7 +307,7 @@ func DeleteAccount(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func Logout(w http.ResponseWriter, r *http.Request) {
+func PostLogout(w http.ResponseWriter, r *http.Request) {
 	//JWT tokens typically just expire
 	//are we going to implement something like cookies instead that we can revoke?
 }

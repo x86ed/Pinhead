@@ -14,7 +14,7 @@ func AdminIndex(w http.ResponseWriter, r *http.Request) {
 	w.Write([]byte("Welcome, Admin."))
 }
 
-func NewGame(w http.ResponseWriter, r *http.Request) {
+func PostNewGame(w http.ResponseWriter, r *http.Request) {
 	connection, _ := GetDatabase()
 	defer CloseDatabase(connection)
 	var newGame = Game{}
@@ -31,7 +31,7 @@ func NewGame(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(newGame)
 }
 
-func NextTurn(w http.ResponseWriter, r *http.Request) {
+func PostNextTurn(w http.ResponseWriter, r *http.Request) {
 	connection, _ := GetDatabase()
 	defer CloseDatabase(connection)
 	var curGame Game
@@ -44,6 +44,7 @@ func NextTurn(w http.ResponseWriter, r *http.Request) {
 			connection.Model(&v).Updates(&Score{Complete: true})
 		}
 		if setNext {
+			currentUser <- v.User.String()
 			connection.Model(&v).Updates(&Score{Active: true})
 		}
 	}
@@ -51,7 +52,7 @@ func NextTurn(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(scores)
 }
 
-func UpdateScore(w http.ResponseWriter, r *http.Request) {
+func PostUpdateScore(w http.ResponseWriter, r *http.Request) {
 	connection, _ := GetDatabase()
 	defer CloseDatabase(connection)
 
@@ -79,7 +80,7 @@ func UpdateScore(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(scores)
 }
 
-func HighScore(w http.ResponseWriter, r *http.Request) {
+func PostHighScore(w http.ResponseWriter, r *http.Request) {
 	connection, _ := GetDatabase()
 	defer CloseDatabase(connection)
 
@@ -95,10 +96,10 @@ func HighScore(w http.ResponseWriter, r *http.Request) {
 	}
 	//gpio for highscore
 	Initials(user.Initials)
-	NextTurn(w, r)
+	PostNextTurn(w, r)
 }
 
-func CreateAdmin(w http.ResponseWriter, r *http.Request) {
+func PostCreateAdmin(w http.ResponseWriter, r *http.Request) {
 	connection, _ := GetDatabase()
 	defer CloseDatabase(connection)
 
@@ -135,4 +136,149 @@ func CreateAdmin(w http.ResponseWriter, r *http.Request) {
 	connection.Create(&user)
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(user)
+}
+
+func GetListUsers(w http.ResponseWriter, r *http.Request) {
+	var users []User
+
+	connection, _ := GetDatabase()
+	defer CloseDatabase(connection)
+
+	result := connection.Find(&users)
+
+	if result.Error != nil {
+		var err Error
+		err = SetError(err, "Failed to get users from the db")
+		w.Header().Set("Content-Type", "application/json")
+		json.NewEncoder(w).Encode(err)
+		return
+	}
+
+	for _, user := range users {
+		user.MarshalJSON()
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(users)
+}
+
+func (u User) MarshalJSON() ([]byte, error) {
+	// prevent recursion
+	type user User
+	x := user(u)
+	// remove users password so it is not returned to the caller
+	x.Password = ""
+	return json.Marshal(x)
+}
+
+func GetListAdmins(w http.ResponseWriter, r *http.Request) {
+	var admins []Admin
+
+	connection, _ := GetDatabase()
+	defer CloseDatabase(connection)
+
+	result := connection.Find(&admins)
+
+	if result.Error != nil {
+		var err Error
+		err = SetError(err, "Failed to get users from the db")
+		w.Header().Set("Content-Type", "application/json")
+		json.NewEncoder(w).Encode(err)
+		return
+	}
+
+	for _, admin := range admins {
+		admin.MarshalJSON()
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(admins)
+}
+
+func (a Admin) MarshalJSON() ([]byte, error) {
+	// prevent recursion
+	type admin Admin
+	x := admin(a)
+	// remove users password so it is not returned to the caller
+	x.Password = ""
+	return json.Marshal(x)
+}
+
+func PostAdminSignIn(w http.ResponseWriter, r *http.Request) {
+	connection, _ := GetDatabase()
+	defer CloseDatabase(connection)
+
+	var authDetails AdminAuthentication
+
+	err := json.NewDecoder(r.Body).Decode(&authDetails)
+	if err != nil {
+		var err Error
+		err = SetError(err, "Error in reading payload.")
+		w.Header().Set("Content-Type", "application/json")
+		json.NewEncoder(w).Encode(err)
+		return
+	}
+
+	var authUser Admin
+	connection.Where("email = 	?", authDetails.Email).First(&authUser)
+
+	if authUser.Email == "" {
+		var err Error
+		err = SetError(err, "Username or Password is incorrect")
+		w.Header().Set("Content-Type", "application/json")
+		json.NewEncoder(w).Encode(err)
+		return
+	}
+
+	check := CheckPasswordHash(authDetails.Password, authUser.Password)
+
+	if !check {
+		var err Error
+		err = SetError(err, "Username or Password is incorrect")
+		w.Header().Set("Content-Type", "application/json")
+		json.NewEncoder(w).Encode(err)
+		return
+	}
+
+	validToken, err := GenerateAdminJWT(authUser.Email)
+	if err != nil {
+		var err Error
+		err = SetError(err, "Failed to generate token")
+		w.Header().Set("Content-Type", "application/json")
+		json.NewEncoder(w).Encode(err)
+		return
+	}
+
+	var token AdminToken
+	token.Email = authUser.Email
+	token.TokenString = validToken
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(token)
+}
+
+func ListActivePlayers(w http.ResponseWriter, r *http.Request) {
+	connection, _ := GetDatabase()
+	defer CloseDatabase(connection)
+	
+	var curGame Game
+	var scores []Score
+	
+	connection.Model(&curGame).Where("in_active = ?", false).First(&curGame)
+	w.Header().Set("Content-Type", "application/json")
+	
+	// get list of users to return as queued players
+	var users []User
+	connection.Model(&curGame).Order("updated_at desc").Association("Users").Find(&users)
+	connection.Model(&curGame).Order("updated_at desc").Association("Scores").Find(&scores)
+	var players []Player
+	for _, element := range users {
+		players = append(players, Player{ID: element.ID, Name: element.Name, Initials: element.Initials, Class: GetScoreState(scores, element.ID)})
+	}
+
+	//playerlist is in reverse order => 
+	for i, j := 0, len(players)-1; i < j; i, j = i+1, j-1 {
+		players[i], players[j] = players[j], players[i]
+	}
+	
+	json.NewEncoder(w).Encode(players);
 }
