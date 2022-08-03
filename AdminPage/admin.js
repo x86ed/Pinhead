@@ -1,4 +1,4 @@
-import { deleteUser, highScore, newGame, nextTurn, updateScore } from "./api.js";
+import { deleteUser, highScore, newGame, nextTurn, updateScore, getPlayers } from "./api.js";
 
 export const confirmDeleteUser = (username, userId) => {
     document.getElementById("deleteUserText").textContent = "Are you sure you want to delete " + username + ":"; 
@@ -31,22 +31,63 @@ const deleteAdminUserBtn = () => {
 async function newGameBtn() {
     console.log("newGameBtn");
     await newGame();
+    HideButtons();
 }
 
 async function nextTurnBtn() {
     console.log("nextTurnBtn");
-    await nextTurn()
+    await nextTurn();
+    HideButtons();
 }
 
 async function highScoreBtn() {
     console.log("highScoreBtn");
-    await highScore()
+    await highScore();
+    HideButtons();
+}
+
+const HideButtons = () => {
+    document.getElementById("nextTurn").visibility = "hidden";
+    document.getElementById("highScore").visibility = "hidden";
 }
 
 async function updateScoreBtn() {
-    const inputVal = document.getElementById("updateScoreIn").value;
-    console.log("updateScoreBtn: ", inputVal);
-    await updateScore("NEED THIS", inputVal);
+    const score = document.getElementById("updateScoreIn").value;
+    let playerList = document.getElementById("activePlayersList");
+    const userId = playerList.firstElementChild.value;
+
+    console.log("updateScoreBtn: ", score);
+    var scoreUpdated = await updateScore(userId, score);
+    if (scoreUpdated) {
+        if (scoreUpdated.is_error) {
+            console.log("Failed to update score for userId: ", userId);
+            return;
+        }
+        document.getElementById("nextTurn").visibility = "visible";
+        document.getElementById("highScore").visibility = "visible";
+    }
+}
+
+async function getPlayersBtn() {
+    let list = document.getElementById("activePlayersList");
+    //clear list
+    list.innerHTML = '';
+
+    var playerList = await getPlayers();
+    if (playerList) {
+        if (playerList.is_error) {
+            console.log("token has expired");
+            window.location.href = "signin.html";
+            return;
+        }
+        console.log("player: ", playerList);
+        playerList.forEach((player) => {
+            let li = document.createElement("bx-list-item");
+            li.innerText = player.name;
+            li.value = player.id;
+            list.appendChild(li);
+        });
+    }
 }
 
 document.querySelector("body").onload = (evt) => {
@@ -56,5 +97,9 @@ document.querySelector("body").onload = (evt) => {
     document.getElementById("updateScoreBtn").addEventListener('click', async () => await updateScoreBtn());
     document.getElementById("nextTurnBtn").addEventListener('click', async () => await nextTurnBtn());
     document.getElementById("highScoreBtn").addEventListener('click', async () => await highScoreBtn());
+    document.getElementById("refreshPlayersBtn").addEventListener('click', async () => await getPlayersBtn());
+
+    getPlayersBtn();
+
     return false;
 }

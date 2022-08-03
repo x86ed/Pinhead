@@ -3,6 +3,7 @@ package main
 import (
 	"encoding/json"
 	"net/http"
+	"strconv"
 )
 
 func AdminIndex(w http.ResponseWriter, r *http.Request) {
@@ -70,8 +71,9 @@ func PostUpdateScore(w http.ResponseWriter, r *http.Request) {
 	connection.Model(&curGame).Where("in_active = ?", false).First(&curGame)
 	connection.Model(&curGame).Where("in_active = ?", false).Order("updated_at desc").Association("Scores").Find(&scores)
 	for _, v := range scores {
-		if v.User == newScore.ID {
-			connection.Model(&v).Updates(&Score{Score: int64(newScore.Score)})
+		if v.User.String() == newScore.ID {
+			score, _ := strconv.Atoi(newScore.Score);
+			connection.Model(&v).Updates(&Score{Score: int64(score)})
 		}
 	}
 	w.Header().Set("Content-Type", "application/json")
@@ -252,4 +254,31 @@ func PostAdminSignIn(w http.ResponseWriter, r *http.Request) {
 	token.TokenString = validToken
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(token)
+}
+
+func ListActivePlayers(w http.ResponseWriter, r *http.Request) {
+	connection, _ := GetDatabase()
+	defer CloseDatabase(connection)
+	
+	var curGame Game
+	var scores []Score
+	
+	connection.Model(&curGame).Where("in_active = ?", false).First(&curGame)
+	w.Header().Set("Content-Type", "application/json")
+	
+	// get list of users to return as queued players
+	var users []User
+	connection.Model(&curGame).Order("updated_at desc").Association("Users").Find(&users)
+	connection.Model(&curGame).Order("updated_at desc").Association("Scores").Find(&scores)
+	var players []Player
+	for _, element := range users {
+		players = append(players, Player{ID: element.ID, Name: element.Name, Initials: element.Initials, Class: GetScoreState(scores, element.ID)})
+	}
+
+	//playerlist is in reverse order => 
+	for i, j := 0, len(players)-1; i < j; i, j = i+1, j-1 {
+		players[i], players[j] = players[j], players[i]
+	}
+	
+	json.NewEncoder(w).Encode(players);
 }

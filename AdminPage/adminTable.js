@@ -170,7 +170,8 @@ async function updateTree() {
     var users = await getAdmins();
     if (users == null || users == undefined || users.is_error) {
       console.log("token has expired");
-      window.location.href="signin.html";
+      window.location.href = "signin.html";
+      return;
     }
     rows = users.map(function (user) {
       return {

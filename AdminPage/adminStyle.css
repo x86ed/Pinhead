@@ -70,6 +70,10 @@ body, html {
     margin: 5px;
   }
 
+  .innerCtrl.hdn {
+    visibility: hidden;
+  }
+
   .smlTxt {
     font-size: x-small;
     align-self: center;
