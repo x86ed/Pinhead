@@ -811,3 +811,7 @@ Use box-shadow for inner-div's sharp-bottom-highight and border-gradient on top
 .hidden{
   opacity: 0;
 }
+
+.hidden-section {
+  display: none;
+}
