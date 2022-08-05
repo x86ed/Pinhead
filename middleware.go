@@ -14,7 +14,7 @@ func IsAuthorizedUser(handler http.HandlerFunc) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 
 		authCook, _ := r.Cookie("Authorization")
-		if len(authCook.Value) < 1 {
+		if authCook == nil || len(authCook.Value) < 1 {
 			authCook = nil
 		}
 

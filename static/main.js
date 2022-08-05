@@ -235,6 +235,9 @@ const handleSignUp = (event) => {
     }
     document.getElementById("name").value = '';
     document.getElementById("initials").value = '';
+    document.getElementById("signin-button").classList.add("remove");
+    document.getElementById("signup-button").classList.add("remove");
+    document.getElementById("logout-button").classList.remove("remove");
     
     signup(name, initials);
 }
@@ -250,21 +253,38 @@ const handleSignIn = (event) => {
     }
     document.getElementById("name").value = '';
     document.getElementById("initials").value = '';
-    
-    signup(name, initials);
+    document.getElementById("signin-button").classList.add("remove");
+    document.getElementById("signup-button").classList.add("remove");
+    document.getElementById("logout-button").classList.remove("remove");
+    signin(name, initials);
 }
 
-const handleLogin = (event) => {
+const handleLogout = (event) => {
     event.preventDefault();
     
-    const name = document.getElementById("name").value;
-    const initials = document.getElementById("initials").value;
-    
-    if (!name.length || !initials.length){
-        return;
-    }
     document.getElementById("name").value = '';
     document.getElementById("initials").value = '';
+
+    // window.localStorage.Item("user")
+
+    const myHeaders = new Headers();
+    myHeaders.append("Content-Type", "application/json");
     
-    signup(name, initials);
+    const requestOptions = {
+        method: 'POST',
+        headers: myHeaders,
+        redirect: 'follow'
+    };
+    
+    fetch("/logout", requestOptions)
+        .then(response => response.json())
+        .then(result => logout(result))
+        .catch(error => console.log('error', error));
+    document.getElementById("signin-button").classList.remove("remove");
+    document.getElementById("signup-button").classList.remove("remove");
+    document.getElementById("logout-button").classList.add("remove");
+}
+
+const logout = (result) =>{
+    window.localStorage.removeItem("user");
 }

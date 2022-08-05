@@ -84,7 +84,7 @@ func PostSignUp(w http.ResponseWriter, r *http.Request) {
 	//check email is alredy registered or not
 	if dbuser.Name != "" {
 		var err Error
-		err = SetError(err, "Email already in use")
+		err = SetError(err, "Name already in use")
 		w.Header().Set("Content-Type", "application/json")
 		json.NewEncoder(w).Encode(err)
 		return
