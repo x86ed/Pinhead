@@ -104,7 +104,7 @@
         <input id="initials" type="text" name="initials" placeholder="ACE"  maxlength="3" required />
         <label for="initials">three letter initials</label>
     </div>
-    <button id="signup-button" type="button">[Signup]</button>
+    <button id="signup-button" type="button" onClick="enableScroll()">[Signup]</button>
       <!-- power switch -->
     <!-- <div class="switch">  
       <div class=round>
@@ -119,7 +119,7 @@
     </div> -->
 </form>
 
-<div class="queue checkcontainer">
+<div class="queue checkcontainer hidden-section">
 <h3>Queue</h3>
 <ol id="queue-list">
 <li class="expired">Ace - ACE</li>
@@ -137,7 +137,7 @@
 </div>
 
 <!-- play cabinet -->
-<div class="cabinet checkcontainer">
+<div class="cabinet checkcontainer hidden-section">
 <div id="grad"></div>
 <div>
 <span id="leftbuttonlabel" class="leftlabel">("L" or "Z")</span>
