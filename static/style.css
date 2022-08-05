@@ -571,6 +571,8 @@ body {
   width: 15%;
 }
 
+button#logout-button,
+button#signin-button,
 button#signup-button {
   position: absolute;
   bottom: 2em;
@@ -583,6 +585,9 @@ button#signup-button {
   font-family: 'Press Start 2P', cursive;
   text-shadow: none;
 }
+
+#logout-button:hover,
+#signin-button:hover,
 #signup-button:hover{
   text-shadow: rgba(51,227,240,0.9) 0px 0px 27px;
 }
@@ -810,4 +815,8 @@ Use box-shadow for inner-div's sharp-bottom-highight and border-gradient on top
 
 .hidden{
   opacity: 0;
+}
+
+.remove{
+  display: none;
 }

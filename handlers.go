@@ -30,22 +30,22 @@ func SocketButton(w http.ResponseWriter, r *http.Request) {
 			break
 		}
 
-		sw := string(message)
+		// sw := string(message)
 		if params["userID"] != activeUser {
-			switch sw {
-			case "LU":
-				Left(false)
-			case "RU":
-				Right(false)
-			case "LD":
-				Left(true)
-			case "RD":
-				Right(true)
-			case "L":
-				Launch()
-			case "S":
-				Start()
-			}
+			// switch sw {
+			// case "LU":
+			// 	Left(false)
+			// case "RU":
+			// 	Right(false)
+			// case "LD":
+			// 	Left(true)
+			// case "RD":
+			// 	Right(true)
+			// case "L":
+			// 	Launch()
+			// case "S":
+			// 	Start()
+			// }
 		}
 		for usr := range currentUser {
 			if usr != activeUser {
@@ -90,42 +90,31 @@ func PostSignUp(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if user.Role == "admin" {
-		var err Error
-		err = SetError(err, "Cannot create'admin' accounts")
-		w.Header().Set("Content-Type", "application/json")
-		json.NewEncoder(w).Encode(err)
-		return
-	}
-
 	user.Password, err = GenerateHashPassword(user.Password)
 	if err != nil {
 		log.Fatalln("Error in password hashing.")
 	}
 
 	// insert user details in database
-	connection.Create(&user)
 	connection.Model(&curGame).Where("in_active = ?", false).First(&curGame)
-	connection.Where("name = ?", user.Name).First(&dbuser)
 	connection.Model(&curGame).Where("in_active = ?", false).Association("Users").Append(&user)
-	connection.Model(&curGame).Where("in_active = ?", false).Association("Scores").Append(&Score{User: user.ID})
-	// might not want this here
-	if len(activeUser) < 1 {
-		currentUser <- user.ID.String()
-	}
 	w.Header().Set("Content-Type", "application/json")
-
 	// get list of users to return as queued players
 	var users []User
 	var scores []Score
 	connection.Model(&curGame).Order("updated_at desc").Association("Users").Find(&users)
 	connection.Model(&curGame).Order("updated_at desc").Association("Scores").Find(&scores)
+	if len(scores) < 1 {
+		connection.Model(&curGame).Where("in_active = ?", false).Association("Scores").Append(&Score{User: user.ID, Active: true})
+		currentUser <- user.ID.String()
+	} else {
+		connection.Model(&curGame).Where("in_active = ?", false).Association("Scores").Append(&Score{User: user.ID})
+	}
 	var players []Player
 
 	for _, element := range users {
-		players = append(players, Player{Name: element.Name, Initials: element.Initials, Class: GetScoreState(scores, element.ID)})
+		players = append(players, Player{Name: element.Name, Initials: element.Initials, Class: GetScoreClass(scores, element.ID), Score: GetScoreValue(scores, element.ID)})
 	}
-
 	// json.NewEncoder(w).Encode(players)
 	validToken, err := GenerateUserJWT(user.Name, user.ID.String())
 	if err != nil {
@@ -142,7 +131,6 @@ func PostSignUp(w http.ResponseWriter, r *http.Request) {
 		Value:   "Bearer " + validToken,
 		Expires: expirationTime,
 	})
-
 	var token Token
 	token.Name = user.Name
 	token.ID = user.ID.String()
@@ -164,34 +152,15 @@ func GetCurrentGame(w http.ResponseWriter, r *http.Request) {
 
 	// get list of users to return as queued players
 	var users []User
-	connection.Model(&curGame).Order("updated_at desc").Association("Users").Find(&users)
-	connection.Model(&curGame).Order("updated_at desc").Association("Scores").Find(&scores)
+	connection.Model(&curGame).Order("created_at asc").Association("Users").Find(&users)
+	connection.Model(&curGame).Order("created_at asc").Association("Scores").Find(&scores)
 	var players []Player
 	for _, element := range users {
-		players = append(players, Player{Name: element.Name, Initials: element.Initials, Class: GetScoreState(scores, element.ID)})
+		players = append(players, Player{Name: element.Name, Initials: element.Initials, Class: GetScoreClass(scores, element.ID), Score: GetScoreValue(scores, element.ID)})
 	}
 
-	json.NewEncoder(w).Encode(users)
+	json.NewEncoder(w).Encode(players)
 }
-
-/*
-func GetListOfQueuedPlayers(connection *gorm.DB) ([]Player) {
-		// get list of users to return as queued players
-		var scores []Score
-		var users []User
-		var curGame Game
-
-		connection.Model(&curGame).Order("updated_at desc").Association("Users").Find(&users)
-		connection.Model(&curGame).Order("updated_at desc").Association("Scores").Find(&scores)
-		var players []Player
-
-		for _, element := range users {
-			players = append(players, Player{Name: element.Name, Initials: element.Initials, Class: GetScoreState(scores, element.ID)})
-		}
-
-		return players;
-}
-*/
 
 func HandleQueue() {
 	connection, _ := GetDatabase()
@@ -244,6 +213,12 @@ func PostSignIn(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	expirationTime := time.Now().Add(time.Hour * 24)
+	http.SetCookie(w, &http.Cookie{
+		Name:    "Authorization",
+		Value:   "Bearer " + validToken,
+		Expires: expirationTime,
+	})
 	var token Token
 	token.Name = authUser.Name
 	token.ID = authUser.ID.String()
@@ -326,6 +301,10 @@ func DeleteAccount(w http.ResponseWriter, r *http.Request) {
 }
 
 func PostLogout(w http.ResponseWriter, r *http.Request) {
-	//JWT tokens typically just expire
-	//are we going to implement something like cookies instead that we can revoke?
+	http.SetCookie(w, &http.Cookie{
+		Name:   "Authorization",
+		MaxAge: -1,
+	})
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(Message{Status: 200, Message: "logged out."})
 }
