@@ -123,7 +123,7 @@ func PostSignUp(w http.ResponseWriter, r *http.Request) {
 	var players []Player
 
 	for _, element := range users {
-		players = append(players, Player{Name: element.Name, Initials: element.Initials, Class: GetScoreState(scores, element.ID)})
+		players = append(players, Player{ID: element.ID, Name: element.Name, Initials: element.Initials, Class: GetScoreState(scores, element.ID)})
 	}
 
 	// json.NewEncoder(w).Encode(players)
@@ -168,30 +168,12 @@ func GetCurrentGame(w http.ResponseWriter, r *http.Request) {
 	connection.Model(&curGame).Order("updated_at desc").Association("Scores").Find(&scores)
 	var players []Player
 	for _, element := range users {
-		players = append(players, Player{Name: element.Name, Initials: element.Initials, Class: GetScoreState(scores, element.ID)})
+		players = append(players, Player{ID: element.ID, Name: element.Name, Initials: element.Initials, Class: GetScoreState(scores, element.ID)})
 	}
 
+	//Should this be returning the player???
 	json.NewEncoder(w).Encode(users)
 }
-
-/*
-func GetListOfQueuedPlayers(connection *gorm.DB) ([]Player) {
-		// get list of users to return as queued players
-		var scores []Score
-		var users []User
-		var curGame Game
-
-		connection.Model(&curGame).Order("updated_at desc").Association("Users").Find(&users)
-		connection.Model(&curGame).Order("updated_at desc").Association("Scores").Find(&scores)
-		var players []Player
-
-		for _, element := range users {
-			players = append(players, Player{Name: element.Name, Initials: element.Initials, Class: GetScoreState(scores, element.ID)})
-		}
-
-		return players;
-}
-*/
 
 func HandleQueue() {
 	connection, _ := GetDatabase()

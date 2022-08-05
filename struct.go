@@ -35,10 +35,11 @@ const (
 )
 
 type Player struct {
-	Name     string `json:"name"`
-	Initials string `json:"initials"`
-	Class    string `json:"class"`
-	Score    int    `json:"score"`
+	ID       uuid.UUID `json:"id"`
+	Name     string    `json:"name"`
+	Initials string    `json:"initials"`
+	Class    string    `json:"class"`
+	Score    int       `json:"score"`
 }
 
 type CurGame struct {
@@ -47,6 +48,6 @@ type CurGame struct {
 }
 
 type ScoreUpdate struct {
-	ID    uuid.UUID
-	Score int
+	ID    string `json:"id"`
+	Score string `json:"score"`
 }

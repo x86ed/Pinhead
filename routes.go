@@ -38,6 +38,7 @@ func InitializeRoute() {
 	})
 
 	//local server for admin
+    localRouter.HandleFunc("/players", IsAuthorizedAdmin(ListActivePlayers)).Methods("GET")
 	localRouter.HandleFunc("/users", IsAuthorizedAdmin(GetListUsers)).Methods("GET")
 	localRouter.HandleFunc("/admins", IsAuthorizedAdmin(GetListAdmins)).Methods("GET")
 

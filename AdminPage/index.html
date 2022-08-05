@@ -8,6 +8,7 @@
     <script type="module" src="https://1.www.s81c.com/common/carbon/web-components/tag/latest/tabs.min.js"></script>
     <script type="module" src="https://1.www.s81c.com/common/carbon/web-components/tag/latest/modal.min.js"></script>
     <script type="module" src="https://1.www.s81c.com/common/carbon/web-components/tag/latest/button.min.js"></script>
+    <script type="module" src="https://1.www.s81c.com/common/carbon/web-components/tag/latest/list.min.js"></script>
     <link rel="stylesheet" href="https://1.www.s81c.com/common/carbon-for-ibm-dotcom/tag/v1/latest/themes.css" />
     <link rel="stylesheet" href="https://1.www.s81c.com/common/carbon-for-ibm-dotcom/tag/v1/latest/plex.css"/>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
@@ -16,7 +17,6 @@
         // user must be authenticated and admin to be here
         let token = sessionStorage.getItem('jwtToken');
         let email = sessionStorage.getItem('userEmail');
-        console.log("email: ", email)
         if (token === null || token === undefined || email === null || email === undefined)
         {
           window.location.href="signin.html";
@@ -45,21 +45,29 @@
           </button>
         </div>
         <div class="updateScore">
-          <input id="updateScoreIn" type="number" placeholder="Current users score" value=""/>
+          <p class="smlTxt">Update Score:</p>
+          <input id="updateScoreIn" type="number"/>
           <button class="btn" id="updateScoreBtn">
             <i class="fa fa-angle-double-right" aria-hidden="true"></i>
           </button>
         </div>
-        <div class="innerCtrl">
-          <p class="smlTxt">End current users turn</p>
+        <div class="innerCtrl hdn" id="nextTurn">
+          <p class="smlTxt">Start next turn. No high score</p>
           <button class="btn" id="nextTurnBtn">Next Turn</button>
         </div>
-        <div>
-          <button class="btn" id="highScoreBtn">High Score</button>
+        <div class="innerCtrl hdn" id="highScore">
+          <p class="smlTxt">Enter users initials for high score and start next turn</p>
+          <button class="btn hdn" id="highScoreBtn">High Score</button>
         </div>
       </div>
-      <div>
+      <div div class="innerCtrl">
         <p>Current Players</p>
+        <button class="btn" id="refreshPlayersBtn">
+          <i class="fa fa-refresh" aria-hidden="true"></i>
+        </button>
+      </div>
+      <div>
+        <bx-ordered-list id="activePlayersList"></bx-ordered-list>
       </div>
     </div>
     <div id="panel-adminTable" role="tabpanel" aria-labelledby="tab-adminTable" hidden>
