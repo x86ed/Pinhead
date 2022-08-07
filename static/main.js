@@ -140,10 +140,6 @@ const refreshList=(userID)=>{
         .then(response => response.json())
         .then(result => updateList(result))
         .catch(error => console.log('error', error));
-    
-    if (ws) {
-        return false;
-    }
 }
 
 const updateList = (result) => {
@@ -158,6 +154,9 @@ const updateList = (result) => {
     }
     
     queueList.replaceChildren(...arr);
+    document.getElementById("signin-button").classList.add("remove");
+    document.getElementById("signup-button").classList.add("remove");
+    document.getElementById("logout-button").classList.remove("remove");
 }
 
 const signin = (name,initials)=>{
