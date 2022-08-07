@@ -30,22 +30,22 @@ func SocketButton(w http.ResponseWriter, r *http.Request) {
 			break
 		}
 
-		sw := string(message)
+		// sw := string(message)
 		if params["userID"] != activeUser {
-			switch sw {
-			case "LU":
-				Left(false)
-			case "RU":
-				Right(false)
-			case "LD":
-				Left(true)
-			case "RD":
-				Right(true)
-			case "L":
-				Launch()
-			case "S":
-				Start()
-			}
+			// switch sw {
+			// case "LU":
+			// 	Left(false)
+			// case "RU":
+			// 	Right(false)
+			// case "LD":
+			// 	Left(true)
+			// case "RD":
+			// 	Right(true)
+			// case "L":
+			// 	Launch()
+			// case "S":
+			// 	Start()
+			// }
 		}
 		for usr := range currentUser {
 			if usr != activeUser {
@@ -157,6 +157,29 @@ func GetCurrentGame(w http.ResponseWriter, r *http.Request) {
 	var players []Player
 	for _, element := range users {
 		players = append(players, Player{Name: element.Name, Initials: element.Initials, Class: GetScoreClass(scores, element.ID), Score: GetScoreValue(scores, element.ID)})
+	}
+
+	json.NewEncoder(w).Encode(players)
+}
+
+func GetCurrentGameWID(w http.ResponseWriter, r *http.Request) {
+	connection, _ := GetDatabase()
+	defer CloseDatabase(connection)
+
+	var curGame Game
+	var scores []Score
+
+	connection.Model(&curGame).Where("in_active = ?", false).First(&curGame)
+	w.Header().Set("Content-Type", "application/json")
+	// json.NewEncoder(w).Encode(user)
+
+	// get list of users to return as queued players
+	var users []User
+	connection.Model(&curGame).Order("created_at asc").Association("Users").Find(&users)
+	connection.Model(&curGame).Order("created_at asc").Association("Scores").Find(&scores)
+	var players []AdminPlayer
+	for _, element := range users {
+		players = append(players, AdminPlayer{ID: element.ID.String(), Name: element.Name, Initials: element.Initials, Class: GetScoreClass(scores, element.ID), Score: GetScoreValue(scores, element.ID)})
 	}
 
 	json.NewEncoder(w).Encode(players)

@@ -39,6 +39,14 @@ type Player struct {
 	Score    int64  `json:"score"`
 }
 
+type AdminPlayer struct {
+	ID       string `json:"id"`
+	Name     string `json:"name"`
+	Initials string `json:"initials"`
+	Class    string `json:"class"`
+	Score    int64  `json:"score"`
+}
+
 type CurGame struct {
 	Players []Player `json:"players"`
 	CurID   string   `json:"cur_id"`
