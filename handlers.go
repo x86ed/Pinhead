@@ -30,22 +30,22 @@ func SocketButton(w http.ResponseWriter, r *http.Request) {
 			break
 		}
 
-		// sw := string(message)
+		sw := string(message)
 		if params["userID"] != activeUser {
-			// switch sw {
-			// case "LU":
-			// 	Left(false)
-			// case "RU":
-			// 	Right(false)
-			// case "LD":
-			// 	Left(true)
-			// case "RD":
-			// 	Right(true)
-			// case "L":
-			// 	Launch()
-			// case "S":
-			// 	Start()
-			// }
+			switch sw {
+			case "LU":
+				Left(false)
+			case "RU":
+				Right(false)
+			case "LD":
+				Left(true)
+			case "RD":
+				Right(true)
+			case "L":
+				Launch()
+			case "S":
+				Start()
+			}
 		}
 		for usr := range currentUser {
 			if usr != activeUser {
