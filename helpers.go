@@ -83,7 +83,7 @@ func GenerateAdminJWT(email string) (string, error) {
 
 func GetScoreClass(s []Score, id uuid.UUID) string {
 	for _, score := range s {
-		if score.Active && score.User == id && score.Complete {
+		if score.User == id && score.Complete {
 			return expired
 		}
 		if score.Active && score.User == id {

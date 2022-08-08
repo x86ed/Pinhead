@@ -140,6 +140,11 @@ export async function nextTurn() {
         var resultJson = JSON.parse(result);
 
         console.log("nextTurn resultJson: ", resultJson);
+        resultJson.forEach(element => {
+            if (element.active && !element.complete){
+                window.localStorage.setItem('currentUser', element.user);
+            }
+        });
         return resultJson;
     }
     catch (error) {
@@ -160,6 +165,11 @@ export async function highScore() {
         var resultJson = JSON.parse(result);
 
         console.log("highScore resultJson: ", resultJson);
+        resultJson.forEach(element => {
+            if (element.active && !element.complete){
+                window.localStorage.setItem('currentUser', element.user);
+            }
+        });
         return resultJson;
     }
     catch (error) {

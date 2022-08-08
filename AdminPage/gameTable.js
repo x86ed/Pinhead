@@ -120,7 +120,6 @@ export const table = () => {
               } data-column-id="${columnId}">${title}</bx-table-header-cell>`;
             })
             .join('')}
-          <bx-table-header-cell></<bx-table-header-cell>
         </bx-table-header-row>
       </bx-table-head>
       <bx-table-body id="tableBody">
@@ -183,7 +182,9 @@ async function updateTree() {
       window.location.href="signin.html";
     }
     rows = users.map(function (user) {
-        debugger;
+      if (user.class = 'user'){
+        window.localStorage.setItem('currentUser', user.id);
+      }
       return {
         name: user.name,
         initials: user.initials,

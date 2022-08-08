@@ -2,6 +2,7 @@ package main
 
 import (
 	"encoding/json"
+	"fmt"
 	"net/http"
 )
 
@@ -48,6 +49,7 @@ func PostNextTurn(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 	w.Header().Set("Content-Type", "application/json")
+	fmt.Printf("scores: %+v\n", scores)
 	json.NewEncoder(w).Encode(scores)
 }
 
@@ -75,6 +77,7 @@ func PostUpdateScore(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 	w.Header().Set("Content-Type", "application/json")
+	fmt.Printf("scores: %+v\n", scores)
 	json.NewEncoder(w).Encode(scores)
 }
 
