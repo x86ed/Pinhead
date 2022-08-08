@@ -823,6 +823,8 @@ Use box-shadow for inner-div's sharp-bottom-highight and border-gradient on top
   opacity: 0;
 }
 
-.remove{
+
+.remove,
+.hidden-section {
   display: none;
 }
