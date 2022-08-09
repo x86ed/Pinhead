@@ -46,12 +46,12 @@ func SocketButton(w http.ResponseWriter, r *http.Request) {
 			Start()
 		}
 		// }
-		for usr := range currentUser {
-			if usr != activeUser {
-				activeUser = usr
-				c.WriteMessage(mt, []byte("NEW TURN"))
-			}
-		}
+		// for usr := range currentUser {
+		// 	if usr != activeUser {
+		// 		activeUser = usr
+		// 		c.WriteMessage(mt, []byte("NEW TURN"))
+		// 	}
+		// }
 		log.Printf("recv: %s", message)
 		err = c.WriteMessage(mt, message)
 		if err != nil {
@@ -105,7 +105,7 @@ func PostSignUp(w http.ResponseWriter, r *http.Request) {
 	connection.Model(&curGame).Order("updated_at desc").Association("Scores").Find(&scores)
 	if len(scores) < 1 {
 		connection.Model(&curGame).Where("in_active = ?", false).Association("Scores").Append(&Score{User: user.ID, Active: true})
-		currentUser <- user.ID.String()
+		//currentUser <- user.ID.String()
 	} else {
 		connection.Model(&curGame).Where("in_active = ?", false).Association("Scores").Append(&Score{User: user.ID})
 	}

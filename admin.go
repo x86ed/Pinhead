@@ -43,7 +43,7 @@ func PostNextTurn(w http.ResponseWriter, r *http.Request) {
 			connection.Model(&v).Updates(map[string]interface{}{"complete": true, "active": false})
 		}
 		if !v.Active && !v.Complete {
-			currentUser <- v.User.String()
+			//currentUser <- v.User.String()
 			connection.Model(&v).Updates(Score{Active: true})
 			break
 		}
