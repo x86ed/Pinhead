@@ -81,9 +81,9 @@ func GenerateAdminJWT(email string) (string, error) {
 	return tokenString, nil
 }
 
-func GetScoreState(s []Score, id uuid.UUID) string {
+func GetScoreClass(s []Score, id uuid.UUID) string {
 	for _, score := range s {
-		if score.Active && score.User == id && score.Complete {
+		if score.User == id && score.Complete {
 			return expired
 		}
 		if score.Active && score.User == id {
@@ -91,4 +91,13 @@ func GetScoreState(s []Score, id uuid.UUID) string {
 		}
 	}
 	return upcoming
+}
+
+func GetScoreValue(s []Score, id uuid.UUID) int64 {
+	for _, score := range s {
+		if score.User == id {
+			return score.Score
+		}
+	}
+	return 0
 }

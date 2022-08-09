@@ -9,7 +9,6 @@ import (
 )
 
 func Initials(abc string) {
-	//TODO write initial entry function
 	fmt.Println(abc)
 
 	var lastChar rune
@@ -46,13 +45,11 @@ func Initials(abc string) {
 
 		if offset >= 0 {
 			for i := 0; i < offset; i++ {
-				Right(true) // no need for debounce here?
-				Right(false)
+				RightClick()
 			}
 		} else if offset < 0 {
 			for i := 0; i < -offset; i++ {
-				Left(true) // what about here?
-				Left(false)
+				LeftClick()
 			}
 		}
 
@@ -97,6 +94,22 @@ func Left(d bool) {
 	}
 }
 
+func LeftClick() {
+	offset1 := rpi.J8p31
+	v1 := 0
+	l1, err := gpiod.RequestLine("gpiochip0", offset1, gpiod.AsOutput(v1))
+	if err != nil {
+		panic(err)
+	}
+	defer func() {
+		l1.Reconfigure(gpiod.AsInput)
+		l1.Close()
+	}()
+	l1.SetValue(1)
+	time.Sleep(time.Millisecond * 100)
+	l1.SetValue(0)
+}
+
 func Right(d bool) {
 	if d == true && rightState == 2 {
 		return
@@ -125,6 +138,22 @@ func Right(d bool) {
 	} else {
 		rightState = 1
 	}
+}
+
+func RightClick() {
+	offset1 := rpi.J8p37
+	v1 := 0
+	l1, err := gpiod.RequestLine("gpiochip0", offset1, gpiod.WithPullUp, gpiod.AsOutput(v1))
+	if err != nil {
+		panic(err)
+	}
+	defer func() {
+		l1.Reconfigure(gpiod.AsInput)
+		l1.Close()
+	}()
+	l1.SetValue(1)
+	time.Sleep(time.Millisecond * 100)
+	l1.SetValue(0)
 }
 
 func Start() {

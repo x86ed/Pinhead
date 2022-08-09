@@ -123,19 +123,40 @@ const getList=(result)=>{
     }
 }
 
+const refreshList=(userID)=>{
+    if (!userID || !userID.length){
+        return;
+    }
+    const myHeaders = new Headers();
+    myHeaders.append("Content-Type", "application/json");
+    const requestOptions = {
+        method: 'GET',
+        headers: myHeaders,
+        credentials: 'include',
+        redirect: 'follow'
+    };
+    
+    fetch("/game", requestOptions)
+        .then(response => response.json())
+        .then(result => updateList(result))
+        .catch(error => console.log('error', error));
+}
+
 const updateList = (result) => {
     const queueList = document.getElementById('queue-list');
     
     let arr = [];
     for (const element of result) {
         let listItem = document.createElement('li');
-        listItem.textContent = `${element.name} - ${element.initials}`;
+        listItem.textContent = `${element.score || element.name} - ${element.initials}`;
         arr.push(listItem);
+        listItem.classList.add(element.class);
     }
     
-    arr[0].classList.add("user");
-    
     queueList.replaceChildren(...arr);
+    document.getElementById("signin-button").classList.add("remove");
+    document.getElementById("signup-button").classList.add("remove");
+    document.getElementById("logout-button").classList.remove("remove");
 }
 
 const signin = (name,initials)=>{
@@ -156,12 +177,11 @@ const signin = (name,initials)=>{
 
     fetch("/signin", requestOptions)
     .then(response => response.text())
-    .then(result => console.log(result))
+    .then(result => getList(result))
     .catch(error => console.log('error', error));
 }
 
 const myHeaders = new Headers();
-myHeaders.append("Authorization", "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhdXRob3JpemVkIjp0cnVlLCJleHAiOjE2NTU2Njg5MjAsIm5hbWUiOiJkZXJwIiwicm9sZSI6InVzZXIifQ.w09Rwoa7X0Fu5aMXrvQ5KMwA5VeSpMhSJ1j24snTdJU");
 
 const requestOptions = {
   method: 'GET',
@@ -195,9 +215,11 @@ const wsSend = (val) =>{
 }
 
 document.querySelector("body").onload = (evt) => {
-
+    refreshList(window.localStorage.getItem("user"));
     // Sign Up
     document.getElementById("signup-button").addEventListener("click", handleSignUp);
+    document.getElementById("signin-button").addEventListener("click", handleSignIn);
+    document.getElementById("logout-button").addEventListener("click", handleLogout);
     return false;
 };
 
@@ -212,10 +234,59 @@ const handleSignUp = (event) => {
     }
     document.getElementById("name").value = '';
     document.getElementById("initials").value = '';
+    document.getElementById("signin-button").classList.add("remove");
+    document.getElementById("signup-button").classList.add("remove");
+    document.getElementById("logout-button").classList.remove("remove");
     
     signup(name, initials);
 }
 
+const handleSignIn = (event) => {
+    event.preventDefault();
+    
+    const name = document.getElementById("name").value;
+    const initials = document.getElementById("initials").value;
+    
+    if (!name.length || !initials.length){
+        return;
+    }
+    document.getElementById("name").value = '';
+    document.getElementById("initials").value = '';
+    document.getElementById("signin-button").classList.add("remove");
+    document.getElementById("signup-button").classList.add("remove");
+    document.getElementById("logout-button").classList.remove("remove");
+    signin(name, initials);
+}
+
+const handleLogout = (event) => {
+    event.preventDefault();
+    
+    document.getElementById("name").value = '';
+    document.getElementById("initials").value = '';
+
+    // window.localStorage.Item("user")
+
+    const myHeaders = new Headers();
+    myHeaders.append("Content-Type", "application/json");
+    
+    const requestOptions = {
+        method: 'POST',
+        headers: myHeaders,
+        redirect: 'follow'
+    };
+    
+    fetch("/logout", requestOptions)
+        .then(response => response.json())
+        .then(result => logout(result))
+        .catch(error => console.log('error', error));
+    document.getElementById("signin-button").classList.remove("remove");
+    document.getElementById("signup-button").classList.remove("remove");
+    document.getElementById("logout-button").classList.add("remove");
+}
+
+const logout = (result) =>{
+    window.localStorage.removeItem("user");
+}
 
 const showLowerSections = () => {
     const queue = document.getElementsByClassName('queue');

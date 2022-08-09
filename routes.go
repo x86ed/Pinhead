@@ -49,6 +49,7 @@ func InitializeRoute() {
 	localRouter.HandleFunc("/signin", PostAdminSignIn).Methods("POST")
 	localRouter.HandleFunc("/admin", IsAuthorizedAdmin(PostCreateAdmin)).Methods("POST")
 	localRouter.HandleFunc("/admin", IsAuthorizedAdmin(DeleteAccount)).Methods("DELETE")
+	localRouter.HandleFunc("/game", IsAuthorizedAdmin(GetCurrentGame)).Methods("GET")
 
 	localRouter.Methods("OPTIONS").HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Access-Control-Allow-Origin", "")

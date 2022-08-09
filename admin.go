@@ -2,6 +2,7 @@ package main
 
 import (
 	"encoding/json"
+	"fmt"
 	"net/http"
 )
 
@@ -35,19 +36,20 @@ func PostNextTurn(w http.ResponseWriter, r *http.Request) {
 	defer CloseDatabase(connection)
 	var curGame Game
 	var scores []Score
-	connection.Model(&curGame).Where("in_active = ?", false).Order("updated_at desc").Association("Scores").Find(&scores)
-	var setNext bool
+	connection.Model(&curGame).Where("in_active = ?", false).First(&curGame)
+	connection.Model(&curGame).Order("updated_at desc").Association("Scores").Find(&scores)
 	for _, v := range scores {
 		if v.Active && !v.Complete {
-			setNext = true
-			connection.Model(&v).Updates(&Score{Complete: true})
+			connection.Model(&v).Updates(map[string]interface{}{"complete": true, "active": false})
 		}
-		if setNext {
+		if !v.Active && !v.Complete {
 			currentUser <- v.User.String()
-			connection.Model(&v).Updates(&Score{Active: true})
+			connection.Model(&v).Updates(Score{Active: true})
+			break
 		}
 	}
 	w.Header().Set("Content-Type", "application/json")
+	fmt.Printf("scores: %+v\n", scores)
 	json.NewEncoder(w).Encode(scores)
 }
 
@@ -68,13 +70,14 @@ func PostUpdateScore(w http.ResponseWriter, r *http.Request) {
 	var curGame Game
 	var scores []Score
 	connection.Model(&curGame).Where("in_active = ?", false).First(&curGame)
-	connection.Model(&curGame).Where("in_active = ?", false).Order("updated_at desc").Association("Scores").Find(&scores)
+	connection.Model(&curGame).Order("updated_at desc").Association("Scores").Find(&scores)
 	for _, v := range scores {
-		if v.User == newScore.ID {
+		if v.User.String() == newScore.ID {
 			connection.Model(&v).Updates(&Score{Score: int64(newScore.Score)})
 		}
 	}
 	w.Header().Set("Content-Type", "application/json")
+	fmt.Printf("scores: %+v\n", scores)
 	json.NewEncoder(w).Encode(scores)
 }
 
@@ -85,7 +88,7 @@ func PostHighScore(w http.ResponseWriter, r *http.Request) {
 	var curGame Game
 	var scores []Score
 	var user User
-	connection.Model(&curGame).Where("in_active = ?", false).Order("updated_at desc").Association("Scores").Find(&scores)
+	connection.Model(&curGame).Where("active = ?", false).Order("updated_at desc").Association("Scores").Find(&scores)
 	for _, v := range scores {
 		if v.Active && !v.Complete {
 			connection.Where("id = ?", v.User).First(&user)

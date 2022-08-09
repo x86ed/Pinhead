@@ -1,7 +1,5 @@
 package main
 
-import uuid "github.com/satori/go.uuid"
-
 type Authentication struct {
 	Name     string `json:"name"`
 	Password string `json:"password"`
@@ -38,7 +36,15 @@ type Player struct {
 	Name     string `json:"name"`
 	Initials string `json:"initials"`
 	Class    string `json:"class"`
-	Score    int    `json:"score"`
+	Score    int64  `json:"score"`
+}
+
+type AdminPlayer struct {
+	ID       string `json:"id"`
+	Name     string `json:"name"`
+	Initials string `json:"initials"`
+	Class    string `json:"class"`
+	Score    int64  `json:"score"`
 }
 
 type CurGame struct {
@@ -47,6 +53,11 @@ type CurGame struct {
 }
 
 type ScoreUpdate struct {
-	ID    uuid.UUID
+	ID    string
 	Score int
+}
+
+type Message struct {
+	Status  int    `json:"status"`
+	Message string `json:"message"`
 }
