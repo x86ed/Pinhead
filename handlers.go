@@ -3,10 +3,12 @@ package main
 import (
 	"encoding/json"
 	"flag"
+	"fmt"
 	"log"
 	"net/http"
 	"time"
 
+	"github.com/gorilla/mux"
 	"github.com/gorilla/websocket"
 )
 
@@ -15,7 +17,7 @@ var addr = flag.String("addr", "localhost:8080", "http service address")
 var upgrader = websocket.Upgrader{} // use default options
 
 func SocketButton(w http.ResponseWriter, r *http.Request) {
-	//params := mux.Vars(r)
+	params := mux.Vars(r)
 	c, err := upgrader.Upgrade(w, r, nil)
 	if err != nil {
 		log.Print("upgrade:", err)
@@ -30,28 +32,37 @@ func SocketButton(w http.ResponseWriter, r *http.Request) {
 		}
 
 		sw := string(message)
-		// if params["userID"] != activeUser {
-		switch sw {
-		case "LU":
-			Left(false)
-		case "RU":
-			Right(false)
-		case "LD":
-			Left(true)
-		case "RD":
-			Right(true)
-		case "L":
-			Launch()
-		case "S":
-			Start()
+		if params["userID"] != activeUser {
+			switch sw {
+			case "LU":
+				Left(false)
+				fmt.Println("⬅")
+			case "RU":
+				Right(false)
+				fmt.Println("⮕")
+			case "LD":
+				Left(true)
+				fmt.Println("⇦")
+			case "RD":
+				Right(true)
+				fmt.Println("⇨")
+			case "L":
+				Launch()
+				fmt.Println("⬆")
+			case "S":
+				Start()
+				fmt.Println("🙋")
+			}
 		}
-		// }
-		// for usr := range currentUser {
-		// 	if usr != activeUser {
-		// 		activeUser = usr
-		// 		c.WriteMessage(mt, []byte("NEW TURN"))
-		// 	}
-		// }
+		select {
+		case usr := <-currentUser:
+			if usr != activeUser {
+				activeUser = usr
+				c.WriteMessage(mt, []byte("NEW TURN"))
+			}
+		default:
+			fmt.Println("no message received")
+		}
 		log.Printf("recv: %s", message)
 		err = c.WriteMessage(mt, message)
 		if err != nil {
@@ -105,7 +116,7 @@ func PostSignUp(w http.ResponseWriter, r *http.Request) {
 	connection.Model(&curGame).Order("updated_at desc").Association("Scores").Find(&scores)
 	if len(scores) < 1 {
 		connection.Model(&curGame).Where("in_active = ?", false).Association("Scores").Append(&Score{User: user.ID, Active: true})
-		//currentUser <- user.ID.String()
+		currentUser <- user.ID.String()
 	} else {
 		connection.Model(&curGame).Where("in_active = ?", false).Association("Scores").Append(&Score{User: user.ID})
 	}

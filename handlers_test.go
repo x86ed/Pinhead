@@ -57,14 +57,14 @@ func TestUserIndex(t *testing.T) {
 	data.Set("name", "ace")
 	data.Set("role", "user")
 
-	req, err := http.NewRequest("GET", "/user", strings.NewReader(data.Encode()))
+	req, err := http.NewRequest("GET", "/game", strings.NewReader(data.Encode()))
 
 	if err != nil {
 		t.Error(err)
 	}
 
 	rr := httptest.NewRecorder()
-	handler := http.HandlerFunc(UserIndex)
+	handler := http.HandlerFunc(GetCurrentGame)
 
 	handler.ServeHTTP(rr, req)
 
@@ -81,7 +81,7 @@ func TestListUsers(t *testing.T) {
 	}
 
 	rr := httptest.NewRecorder()
-	handler := http.HandlerFunc(ListUsers)
+	handler := http.HandlerFunc(GetListUsers)
 
 	handler.ServeHTTP(rr, req)
 
