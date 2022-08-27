@@ -9,16 +9,16 @@ import (
 )
 
 func TestNewGame(t *testing.T) {
-	
+
 	req, err := http.NewRequest("POST", "/new_game", nil)
-	
+
 	if err != nil {
 		t.Error(err)
 	}
-	
+
 	rr := httptest.NewRecorder()
-	handler := http.HandlerFunc(NewGame)
-	
+	handler := http.HandlerFunc(PostNewGame)
+
 	handler.ServeHTTP(rr, req)
 
 	if status := rr.Code; status != http.StatusOK {
@@ -27,16 +27,16 @@ func TestNewGame(t *testing.T) {
 }
 
 func TestNextTurn(t *testing.T) {
-	
+
 	req, err := http.NewRequest("POST", "/next_turn", nil)
-	
+
 	if err != nil {
 		t.Error(err)
 	}
-	
+
 	rr := httptest.NewRecorder()
-	handler := http.HandlerFunc(NextTurn)
-	
+	handler := http.HandlerFunc(PostNextTurn)
+
 	handler.ServeHTTP(rr, req)
 
 	if status := rr.Code; status != http.StatusOK {
@@ -45,20 +45,20 @@ func TestNextTurn(t *testing.T) {
 }
 
 func TestUpdateScore(t *testing.T) {
-	
+
 	data := url.Values{}
 	data.Set("id", "1")
 	data.Set("score", "1")
-	
+
 	req, err := http.NewRequest("POST", "/update_score", strings.NewReader(data.Encode()))
-	
+
 	if err != nil {
 		t.Error(err)
 	}
-	
+
 	rr := httptest.NewRecorder()
-	handler := http.HandlerFunc(UpdateScore)
-	
+	handler := http.HandlerFunc(PostUpdateScore)
+
 	handler.ServeHTTP(rr, req)
 
 	if status := rr.Code; status != http.StatusOK {
@@ -67,20 +67,20 @@ func TestUpdateScore(t *testing.T) {
 }
 
 func TestHighScore(t *testing.T) {
-	
+
 	data := url.Values{}
 	data.Set("id", "1")
 	data.Set("score", "1")
-	
+
 	req, err := http.NewRequest("POST", "/high_score", strings.NewReader(data.Encode()))
-	
+
 	if err != nil {
 		t.Error(err)
 	}
-	
+
 	rr := httptest.NewRecorder()
-	handler := http.HandlerFunc(HighScore)
-	
+	handler := http.HandlerFunc(PostHighScore)
+
 	handler.ServeHTTP(rr, req)
 
 	if status := rr.Code; status != http.StatusOK {
@@ -89,20 +89,20 @@ func TestHighScore(t *testing.T) {
 }
 
 func TestCreateAdmin(t *testing.T) {
-	
+
 	data := url.Values{}
 	data.Set("name", "admin")
 	data.Set("role", "admin")
-	
+
 	req, err := http.NewRequest("POST", "/admin", strings.NewReader(data.Encode()))
-	
+
 	if err != nil {
 		t.Error(err)
 	}
-	
+
 	rr := httptest.NewRecorder()
-	handler := http.HandlerFunc(CreateAdmin)
-	
+	handler := http.HandlerFunc(PostCreateAdmin)
+
 	handler.ServeHTTP(rr, req)
 
 	if status := rr.Code; status != http.StatusOK {

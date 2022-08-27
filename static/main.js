@@ -157,6 +157,7 @@ const updateList = (result) => {
     document.getElementById("signin-button").classList.add("remove");
     document.getElementById("signup-button").classList.add("remove");
     document.getElementById("logout-button").classList.remove("remove");
+    enableScroll();
 }
 
 const signin = (name,initials)=>{

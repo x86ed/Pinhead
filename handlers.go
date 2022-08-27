@@ -3,6 +3,7 @@ package main
 import (
 	"encoding/json"
 	"flag"
+	"fmt"
 	"log"
 	"net/http"
 	"time"
@@ -35,23 +36,32 @@ func SocketButton(w http.ResponseWriter, r *http.Request) {
 			switch sw {
 			case "LU":
 				Left(false)
+				fmt.Println("⬅")
 			case "RU":
 				Right(false)
+				fmt.Println("⮕")
 			case "LD":
 				Left(true)
+				fmt.Println("⇦")
 			case "RD":
 				Right(true)
+				fmt.Println("⇨")
 			case "L":
 				Launch()
+				fmt.Println("⬆")
 			case "S":
 				Start()
+				fmt.Println("🙋")
 			}
 		}
-		for usr := range currentUser {
+		select {
+		case usr := <-currentUser:
 			if usr != activeUser {
 				activeUser = usr
 				c.WriteMessage(mt, []byte("NEW TURN"))
 			}
+		default:
+			fmt.Println("no message received")
 		}
 		log.Printf("recv: %s", message)
 		err = c.WriteMessage(mt, message)
