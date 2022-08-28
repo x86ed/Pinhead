@@ -1,7 +1,6 @@
 package main
 
 import (
-	"encoding/json"
 	"fmt"
 	"net/http"
 	"strings"
@@ -21,7 +20,7 @@ func IsAuthorizedUser(handler http.HandlerFunc) http.HandlerFunc {
 		if r.Header["Authorization"] == nil && authCook == nil {
 			var err Error
 			err = SetError(err, "No Token Found")
-			json.NewEncoder(w).Encode(err)
+			JSONError(w, err, 500)
 			return
 		}
 
@@ -41,7 +40,7 @@ func IsAuthorizedUser(handler http.HandlerFunc) http.HandlerFunc {
 		if err != nil {
 			var err Error
 			err = SetError(err, "Your Token has been expired.")
-			json.NewEncoder(w).Encode(err)
+			JSONError(w, err, 403)
 			return
 		}
 
@@ -52,7 +51,7 @@ func IsAuthorizedUser(handler http.HandlerFunc) http.HandlerFunc {
 		}
 		var reserr Error
 		SetError(reserr, "Not Authorized.")
-		json.NewEncoder(w).Encode(err)
+		JSONError(w, err, 403)
 	}
 }
 
@@ -63,7 +62,7 @@ func IsAuthorizedAdmin(handler http.HandlerFunc) http.HandlerFunc {
 		if r.Header["Authorization"] == nil {
 			var err Error
 			err = SetError(err, "No Token Found")
-			json.NewEncoder(w).Encode(err)
+			JSONError(w, err, 403)
 			return
 		}
 
@@ -78,7 +77,7 @@ func IsAuthorizedAdmin(handler http.HandlerFunc) http.HandlerFunc {
 		if err != nil {
 			var err Error
 			err = SetError(err, "Your Token has been expired.")
-			json.NewEncoder(w).Encode(err)
+			JSONError(w, err, 403)
 			return
 		}
 
@@ -89,6 +88,6 @@ func IsAuthorizedAdmin(handler http.HandlerFunc) http.HandlerFunc {
 		}
 		var reserr Error
 		SetError(reserr, "Not Authorized.")
-		json.NewEncoder(w).Encode(err)
+		JSONError(w, err, 403)
 	}
 }

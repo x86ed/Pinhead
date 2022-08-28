@@ -16,6 +16,13 @@ var addr = flag.String("addr", "localhost:8080", "http service address")
 
 var upgrader = websocket.Upgrader{} // use default options
 
+func JSONError(w http.ResponseWriter, err interface{}, code int) {
+	w.Header().Set("Content-Type", "application/json; charset=utf-8")
+	w.Header().Set("X-Content-Type-Options", "nosniff")
+	w.WriteHeader(code)
+	json.NewEncoder(w).Encode(err)
+}
+
 func SocketButton(w http.ResponseWriter, r *http.Request) {
 	params := mux.Vars(r)
 	c, err := upgrader.Upgrade(w, r, nil)
@@ -36,22 +43,16 @@ func SocketButton(w http.ResponseWriter, r *http.Request) {
 			switch sw {
 			case "LU":
 				Left(false)
-				fmt.Println("⬅")
 			case "RU":
 				Right(false)
-				fmt.Println("⮕")
 			case "LD":
 				Left(true)
-				fmt.Println("⇦")
 			case "RD":
 				Right(true)
-				fmt.Println("⇨")
 			case "L":
 				Launch()
-				fmt.Println("⬆")
 			case "S":
 				Start()
-				fmt.Println("🙋")
 			}
 		}
 		select {
@@ -81,8 +82,7 @@ func PostSignUp(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		var err Error
 		err = SetError(err, "Error in reading payload.")
-		w.Header().Set("Content-Type", "application/json")
-		json.NewEncoder(w).Encode(err)
+		JSONError(w, err, 500)
 		return
 	}
 
@@ -95,14 +95,13 @@ func PostSignUp(w http.ResponseWriter, r *http.Request) {
 	if dbuser.Name != "" {
 		var err Error
 		err = SetError(err, "Name already in use")
-		w.Header().Set("Content-Type", "application/json")
-		json.NewEncoder(w).Encode(err)
+		JSONError(w, err, 500)
 		return
 	}
 
 	user.Password, err = GenerateHashPassword(user.Password)
 	if err != nil {
-		log.Fatalln("Error in password hashing.")
+		JSONError(w, err, 500)
 	}
 
 	// insert user details in database
@@ -130,8 +129,7 @@ func PostSignUp(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		var err Error
 		err = SetError(err, "Failed to generate token")
-		w.Header().Set("Content-Type", "application/json")
-		json.NewEncoder(w).Encode(err)
+		JSONError(w, err, 500)
 		return
 	}
 
@@ -211,8 +209,7 @@ func PostSignIn(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		var err Error
 		err = SetError(err, "Error in reading payload.")
-		w.Header().Set("Content-Type", "application/json")
-		json.NewEncoder(w).Encode(err)
+		JSONError(w, err, 500)
 		return
 	}
 
@@ -222,8 +219,7 @@ func PostSignIn(w http.ResponseWriter, r *http.Request) {
 	if authUser.Name == "" {
 		var err Error
 		err = SetError(err, "Username or Password is incorrect")
-		w.Header().Set("Content-Type", "application/json")
-		json.NewEncoder(w).Encode(err)
+		JSONError(w, err, 403)
 		return
 	}
 
@@ -232,8 +228,7 @@ func PostSignIn(w http.ResponseWriter, r *http.Request) {
 	if !check {
 		var err Error
 		err = SetError(err, "Username or Password is incorrect")
-		w.Header().Set("Content-Type", "application/json")
-		json.NewEncoder(w).Encode(err)
+		JSONError(w, err, 403)
 		return
 	}
 
@@ -241,8 +236,7 @@ func PostSignIn(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		var err Error
 		err = SetError(err, "Failed to generate token")
-		w.Header().Set("Content-Type", "application/json")
-		json.NewEncoder(w).Encode(err)
+		JSONError(w, err, 500)
 		return
 	}
 
@@ -269,8 +263,7 @@ func GetListControls(w http.ResponseWriter, r *http.Request) {
 	if result.Error != nil {
 		var err Error
 		err = SetError(err, "Failed to get controls from the db")
-		w.Header().Set("Content-Type", "application/json")
-		json.NewEncoder(w).Encode(err)
+		JSONError(w, err, 500)
 		return
 	}
 
@@ -295,8 +288,7 @@ func DeleteAccount(w http.ResponseWriter, r *http.Request) {
 		if dbAdmin.Email == "" {
 			var err Error
 			err = SetError(err, "Username does't exist")
-			w.Header().Set("Content-Type", "application/json")
-			json.NewEncoder(w).Encode(err)
+			JSONError(w, err, 500)
 			return
 		}
 
@@ -304,8 +296,7 @@ func DeleteAccount(w http.ResponseWriter, r *http.Request) {
 		if r.Header.Get("Email") == dbAdmin.Email {
 			var err Error
 			err = SetError(err, "User can't delete themselves")
-			w.Header().Set("Content-Type", "application/json")
-			json.NewEncoder(w).Encode(err)
+			JSONError(w, err, 500)
 			return
 		}
 		connection.Delete(&dbAdmin)
@@ -316,8 +307,7 @@ func DeleteAccount(w http.ResponseWriter, r *http.Request) {
 		if dbUser.Name == "" {
 			var err Error
 			err = SetError(err, "Username does't exist")
-			w.Header().Set("Content-Type", "application/json")
-			json.NewEncoder(w).Encode(err)
+			JSONError(w, err, 500)
 			return
 		}
 
@@ -325,8 +315,7 @@ func DeleteAccount(w http.ResponseWriter, r *http.Request) {
 		if r.Header.Get("Name") == dbUser.Name {
 			var err Error
 			err = SetError(err, "User can't delete themselves")
-			w.Header().Set("Content-Type", "application/json")
-			json.NewEncoder(w).Encode(err)
+			JSONError(w, err, 500)
 			return
 		}
 		connection.Delete(&dbUser)

@@ -63,8 +63,7 @@ func PostUpdateScore(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		var err Error
 		err = SetError(err, "Error in reading payload.")
-		w.Header().Set("Content-Type", "application/json")
-		json.NewEncoder(w).Encode(err)
+		JSONError(w, err, 500)
 		return
 	}
 	var curGame Game
@@ -109,8 +108,7 @@ func PostCreateAdmin(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		var err Error
 		err = SetError(err, "Error in reading payload.")
-		w.Header().Set("Content-Type", "application/json")
-		json.NewEncoder(w).Encode(err)
+		JSONError(w, err, 500)
 		return
 	}
 
@@ -121,15 +119,13 @@ func PostCreateAdmin(w http.ResponseWriter, r *http.Request) {
 	if dbuser.Email != "" {
 		var err Error
 		err = SetError(err, "Email already in use")
-		w.Header().Set("Content-Type", "application/json")
-		json.NewEncoder(w).Encode(err)
+		JSONError(w, err, 500)
 		return
 	}
 
 	user.Password, err = GenerateHashPassword(user.Password)
 	if err != nil {
-		w.Header().Set("Content-Type", "application/json")
-		json.NewEncoder(w).Encode(err)
+		JSONError(w, err, 500)
 		return
 	}
 
@@ -150,8 +146,7 @@ func GetListUsers(w http.ResponseWriter, r *http.Request) {
 	if result.Error != nil {
 		var err Error
 		err = SetError(err, "Failed to get users from the db")
-		w.Header().Set("Content-Type", "application/json")
-		json.NewEncoder(w).Encode(err)
+		JSONError(w, err, 500)
 		return
 	}
 
@@ -183,8 +178,7 @@ func GetListAdmins(w http.ResponseWriter, r *http.Request) {
 	if result.Error != nil {
 		var err Error
 		err = SetError(err, "Failed to get users from the db")
-		w.Header().Set("Content-Type", "application/json")
-		json.NewEncoder(w).Encode(err)
+		JSONError(w, err, 500)
 		return
 	}
 
@@ -215,8 +209,7 @@ func PostAdminSignIn(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		var err Error
 		err = SetError(err, "Error in reading payload.")
-		w.Header().Set("Content-Type", "application/json")
-		json.NewEncoder(w).Encode(err)
+		JSONError(w, err, 500)
 		return
 	}
 
@@ -226,8 +219,7 @@ func PostAdminSignIn(w http.ResponseWriter, r *http.Request) {
 	if authUser.Email == "" {
 		var err Error
 		err = SetError(err, "Username or Password is incorrect")
-		w.Header().Set("Content-Type", "application/json")
-		json.NewEncoder(w).Encode(err)
+		JSONError(w, err, 403)
 		return
 	}
 
@@ -236,8 +228,7 @@ func PostAdminSignIn(w http.ResponseWriter, r *http.Request) {
 	if !check {
 		var err Error
 		err = SetError(err, "Username or Password is incorrect")
-		w.Header().Set("Content-Type", "application/json")
-		json.NewEncoder(w).Encode(err)
+		JSONError(w, err, 403)
 		return
 	}
 
@@ -245,8 +236,7 @@ func PostAdminSignIn(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		var err Error
 		err = SetError(err, "Failed to generate token")
-		w.Header().Set("Content-Type", "application/json")
-		json.NewEncoder(w).Encode(err)
+		JSONError(w, err, 500)
 		return
 	}
 

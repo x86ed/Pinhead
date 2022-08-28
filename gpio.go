@@ -107,10 +107,10 @@ func LeftClick() {
 		l1.Reconfigure(gpiod.AsInput)
 		l1.Close()
 	}()
-	fmt.Println("⬅")
 	l1.SetValue(1)
 	time.Sleep(time.Millisecond * 100)
 	l1.SetValue(0)
+	fmt.Println("⬅")
 }
 
 func Right(d bool) {
@@ -156,10 +156,10 @@ func RightClick() {
 		l1.Reconfigure(gpiod.AsInput)
 		l1.Close()
 	}()
-	fmt.Println("⮕")
 	l1.SetValue(1)
 	time.Sleep(time.Millisecond * 100)
 	l1.SetValue(0)
+	fmt.Println("⮕")
 }
 
 func Start() {
@@ -173,10 +173,10 @@ func Start() {
 		l1.Reconfigure(gpiod.AsInput)
 		l1.Close()
 	}()
-	fmt.Println("🙋")
 	l1.SetValue(1)
 	time.Sleep(time.Millisecond * 100)
 	l1.SetValue(0)
+	fmt.Println("🙋")
 }
 
 func Launch() {
@@ -190,8 +190,8 @@ func Launch() {
 		l1.Reconfigure(gpiod.AsInput)
 		l1.Close()
 	}()
-	fmt.Println("⬆")
 	l1.SetValue(1)
 	time.Sleep(time.Millisecond * 100)
 	l1.SetValue(0)
+	fmt.Println("⬆")
 }
