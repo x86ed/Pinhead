@@ -1,4 +1,11 @@
-const signup = (name,initials) =>{
+const  handleErrors = (response) => {
+    if (!response.ok) {
+        throw Error(response);
+    }
+    return response;
+}
+
+const signup = (name,initials) => {
     const myHeaders = new Headers();
     myHeaders.append("Content-Type", "application/json");
 
@@ -17,12 +24,13 @@ const signup = (name,initials) =>{
     };
     
     fetch("/signup", requestOptions)
+        .then(handleErrors)
         .then(response => response.json())
         .then(result => getList(result))
-        .catch(error => console.log('error', error));
+        .catch(error => console.log('error', error.json()));
 }
 
-const parseJwt =(token) => {
+const parseJwt = (token) => {
     var base64Url = token.split('.')[1];
     var base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
     var jsonPayload = decodeURIComponent(window.atob(base64).split('').map(function(c) {
@@ -32,7 +40,7 @@ const parseJwt =(token) => {
     return JSON.parse(jsonPayload);
 };
 
-const getList=(result)=>{
+const getList = (result) => {
     window.localStorage.setItem('user',result.id);
     const myHeaders = new Headers();
     myHeaders.append("Content-Type", "application/json");
@@ -44,6 +52,7 @@ const getList=(result)=>{
     };
     
     fetch("/game", requestOptions)
+        .then(handleErrors)
         .then(response => response.json())
         .then(result => updateList(result))
         .catch(error => console.log('error', error));
@@ -72,6 +81,7 @@ const getList=(result)=>{
             };
             
             fetch("/game", requestOptions)
+                .then(handleErrors)
                 .then(response => response.json())
                 .then(result => updateList(result))
                 .catch(error => console.log('error', error));
@@ -82,12 +92,13 @@ const getList=(result)=>{
     }
 
     fetch("/controls", )
+    .then(handleErrors)
     .then(response => response.json())
     .then(result => bindHandlers(result))
     .catch(error => console.log('error', error));
 
-    const bindHandlers = (ButtonCommands)=>{
-        ButtonCommands.map((com)=>{
+    const bindHandlers = (ButtonCommands) => {
+        ButtonCommands.map((com) => {
             if (com.dom_id.length){
                 if (com.down_command.length){
                     if (!com.up_command.length){
@@ -103,7 +114,7 @@ const getList=(result)=>{
         });
 
 
-        document.onkeyup = function (e) {
+        document.onkeyup = (e) => {
             e = e || window.event;
             ButtonCommands.forEach((com)=>{
                 if(com.keys.indexOf(e.key)>-1){
@@ -112,7 +123,7 @@ const getList=(result)=>{
             });
         };
 
-        document.onkeydown = function (e) {
+        document.onkeydown = (e) => {
             e = e || window.event;
             ButtonCommands.forEach((com)=>{
                 if(com.keys.indexOf(e.key)>-1){
@@ -123,7 +134,7 @@ const getList=(result)=>{
     }
 }
 
-const refreshList=(userID)=>{
+const refreshList = (userID) => {
     if (!userID || !userID.length){
         return;
     }
@@ -137,6 +148,7 @@ const refreshList=(userID)=>{
     };
     
     fetch("/game", requestOptions)
+        .then(handleErrors)
         .then(response => response.json())
         .then(result => updateList(result))
         .catch(error => console.log('error', error));
@@ -160,7 +172,7 @@ const updateList = (result) => {
     enableScroll();
 }
 
-const signin = (name,initials)=>{
+const signin = (name,initials) => {
     const myHeaders = new Headers();
     myHeaders.append("Content-Type", "application/json");
 
@@ -177,6 +189,7 @@ const signin = (name,initials)=>{
     };
 
     fetch("/signin", requestOptions)
+    .then(handleErrors)
     .then(response => response.text())
     .then(result => getList(result))
     .catch(error => console.log('error', error));
@@ -206,7 +219,7 @@ let output = document.getElementById("output");
 let input = document.getElementById("input");
 let ws;
 
-const wsSend = (val) =>{
+const wsSend = (val) => {
     if (!ws || !val.length){
         return false;
     }
@@ -221,6 +234,11 @@ document.querySelector("body").onload = (evt) => {
     document.getElementById("signup-button").addEventListener("click", handleSignUp);
     document.getElementById("signin-button").addEventListener("click", handleSignIn);
     document.getElementById("logout-button").addEventListener("click", handleLogout);
+    fetch("/game", requestOptions)
+    .then(handleErrors)
+    .then(response => response.json())
+    .then(result => updateList(result))
+    .catch(error => console.log('error', error));
     return false;
 };
 
