@@ -135,7 +135,7 @@ export async function newGame() {
 }
 
 function setUsersResponse(result){
-            console.log("nextTurn result: ", result);
+        console.log("nextTurn result: ", result);
         result.forEach(element => {
                 window.localStorage.setItem('currentUser', element.user);
         });
@@ -152,23 +152,15 @@ export async function nextTurn() {
     .then(response => response.json())
     .then(result => setUsersResponse(result))
     .catch(error => console.log('error', error.json()));
+}
 
-    // try {
-    //     var response = await fetch(baseUrl + "next_turn", requestOptions);
-    //     var result = await response.text();
-    //     var resultJson = JSON.parse(result);
-
-    //     console.log("nextTurn resultJson: ", resultJson);
-    //     resultJson.forEach(element => {
-    //         if (element.active && !element.complete){
-    //             window.localStorage.setItem('currentUser', element.user);
-    //         }
-    //     });
-    //     return resultJson;
-    // }
-    // catch (error) {
-    //     console.log('error', error);
-    // };
+function hScore(resultJson){
+    console.log("highScore resultJson: ", resultJson);
+    resultJson.forEach(element => {
+        if (element.active && !element.complete){
+            window.localStorage.setItem('currentUser', element.user);
+        }
+    });
 }
 
 export async function highScore() {
@@ -177,23 +169,11 @@ export async function highScore() {
         headers: defaultHeaders(true),
         redirect: 'follow'
     };
-
-    try {
-        var response = await fetch(baseUrl + "high_score", requestOptions)
-        var result = await response.text();
-        var resultJson = JSON.parse(result);
-
-        console.log("highScore resultJson: ", resultJson);
-        resultJson.forEach(element => {
-            if (element.active && !element.complete){
-                window.localStorage.setItem('currentUser', element.user);
-            }
-        });
-        return resultJson;
-    }
-    catch (error) {
-        console.log('error', error);
-    };
+    fetch(baseUrl + "high_score", requestOptions)
+    .then(handleErrors)
+    .then(response => response.json())
+    .then(result => hScore(result))
+    .catch(error => console.log('error', error.json()));
 }
 
 export async function updateScore(userId, score) {
@@ -208,16 +188,9 @@ export async function updateScore(userId, score) {
         body: raw,
         redirect: 'follow'
     };
-
-    try {
-        var response = await fetch(baseUrl + "update_score", requestOptions)
-        var result = await response.text();
-        var resultJson = JSON.parse(result);
-
-        console.log("UpdateScore resultJson: ", resultJson);
-        return resultJson;
-    }
-    catch (error) {
-        console.log('error', error);
-    };
+    fetch(baseUrl + "update_score", requestOptions)
+    .then(handleErrors)
+    .then(response => response.json())
+    .then(result => hScore(result))
+    .catch(error => console.log('error', error.json()));
 }

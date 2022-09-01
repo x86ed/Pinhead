@@ -30,23 +30,22 @@ const deleteAdminUserBtn = () => {
 
 async function newGameBtn() {
     console.log("newGameBtn");
-    await newGame();
+    newGame();
 }
 
 async function nextTurnBtn() {
     console.log("nextTurnBtn");
-    await nextTurn()
+    nextTurn()
 }
 
 async function highScoreBtn() {
     console.log("highScoreBtn");
-    await highScore()
+    highScore()
 }
 
 async function updateScoreBtn() {
     const inputVal = document.getElementById("updateScoreIn").value;
-    console.log("updateScoreBtn: ", inputVal);
-    await updateScore("NEED THIS", inputVal);
+    updateScore("NEED THIS", inputVal);
 }
 
 document.querySelector("body").onload = (evt) => {
