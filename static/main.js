@@ -171,6 +171,39 @@ const updateList = (result) => {
     document.getElementById("signup-button").classList.add("remove");
     document.getElementById("logout-button").classList.remove("remove");
     enableScroll();
+    if (ws) {
+        return false;
+    }
+    ws = new WebSocket(getSocketURI());
+    ws.onopen = function(evt) {
+        console.log("OPEN");
+    }
+    ws.onclose = function(evt) {
+        console.log("CLOSE");
+        ws = null;
+    }
+    ws.onmessage = function(evt) {
+        console.log("RESPONSE: " + evt.data);
+        if (evt.data === "NEW TURN"){
+            const myHeaders = new Headers();
+            myHeaders.append("Content-Type", "application/json");
+            const requestOptions = {
+                method: 'GET',
+                headers: myHeaders,
+                credentials: 'include',
+                redirect: 'follow'
+            };
+            
+            fetch("/game", requestOptions)
+                .then(handleErrors)
+                .then(response => response.json())
+                .then(result => updateList(result))
+                .catch(error => console.log('error', error));
+        }
+    }
+    ws.onerror = function(evt) {
+        console.log("ERROR: " + evt.data);
+    }
 }
 
 const signin = (name,initials) => {
