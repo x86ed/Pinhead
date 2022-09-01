@@ -163,6 +163,7 @@ const updateList = (result) => {
         let listItem = document.createElement('li');
         listItem.textContent = `${element.score || element.name} - ${element.initials}`;
         arr.push(listItem);
+        listItem.removeAttribute('class');
         listItem.classList.add(element.class);
     }
     
