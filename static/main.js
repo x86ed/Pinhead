@@ -1,6 +1,6 @@
 const  handleErrors = (response) => {
     if (!response.ok) {
-        throw Error(response);
+        return response.text().then(text => {throw new Error(text)})
     }
     return response;
 }
@@ -41,6 +41,7 @@ const parseJwt = (token) => {
 };
 
 const getList = (result) => {
+    console.log("result: ", result);
     window.localStorage.setItem('user',result.id);
     const myHeaders = new Headers();
     myHeaders.append("Content-Type", "application/json");
