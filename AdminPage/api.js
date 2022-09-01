@@ -1,5 +1,12 @@
 const baseUrl = `http://${window.location.host}/`;
 
+const  handleErrors = (response) => {
+    if (!response.ok) {
+        throw Error(response);
+    }
+    return response;
+}
+
 const defaultHeaders = (includeAuth) => {
     const myHeaders = new Headers();
     myHeaders.append("Content-Type", "application/json");
@@ -127,29 +134,41 @@ export async function newGame() {
     };
 }
 
+function setUsersResponse(result){
+            console.log("nextTurn result: ", result);
+        result.forEach(element => {
+                window.localStorage.setItem('currentUser', element.user);
+        });
+}
+
 export async function nextTurn() {
     const requestOptions = {
         method: 'POST',
         headers: defaultHeaders(true),
         redirect: 'follow'
     };
+    fetch(baseUrl + "next_turn", requestOptions)
+    .then(handleErrors)
+    .then(response => response.json())
+    .then(result => setUsersResponse(result))
+    .catch(error => console.log('error', error.json()));
 
-    try {
-        var response = await fetch(baseUrl + "next_turn", requestOptions)
-        var result = await response.text();
-        var resultJson = JSON.parse(result);
+    // try {
+    //     var response = await fetch(baseUrl + "next_turn", requestOptions);
+    //     var result = await response.text();
+    //     var resultJson = JSON.parse(result);
 
-        console.log("nextTurn resultJson: ", resultJson);
-        resultJson.forEach(element => {
-            if (element.active && !element.complete){
-                window.localStorage.setItem('currentUser', element.user);
-            }
-        });
-        return resultJson;
-    }
-    catch (error) {
-        console.log('error', error);
-    };
+    //     console.log("nextTurn resultJson: ", resultJson);
+    //     resultJson.forEach(element => {
+    //         if (element.active && !element.complete){
+    //             window.localStorage.setItem('currentUser', element.user);
+    //         }
+    //     });
+    //     return resultJson;
+    // }
+    // catch (error) {
+    //     console.log('error', error);
+    // };
 }
 
 export async function highScore() {
